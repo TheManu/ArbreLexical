@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Common.Locks;
+using ArbreLexicalService.Arbre;
+using ArbreLexicalService.Arbre.Dto;
+using Common.Ioc;
 using Common.Traces;
-using Moq;
 
-namespace Common.Ioc
+namespace ArbreLexicalService.Ioc
 {
-    [Ioc(0)]
+    [Ioc(2)]
     internal class ChargementIoc : IChargementIoc
     {
         public void Enregistrer(
@@ -19,13 +19,8 @@ namespace Common.Ioc
         {
             try
             {
-                fabrique.EnregistrerSingleton<ITraces>(() =>
-                    new Mock<ITraces>().Object);
-
-                fabrique.Enregistrer<ILockLectureEtEcriture>(() =>
-                    new LockLectureEtEcriture());
-                fabrique.Enregistrer<ILockLectureEtEcriture, LockRecursionPolicy>(o =>
-                    new LockLectureEtEcriture(o));
+                fabrique.Enregistrer<IArbreLexical, IEnumerable<Etat>>(etats =>
+                    new ArbreLexical(etats));
             }
             catch (Exception ex)
             {

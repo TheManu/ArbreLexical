@@ -62,6 +62,42 @@ namespace ArbreLexicalService.Arbre.Construction
 
         #region Public Methods
 
+        public IArbreLexical FinaliserArbre()
+        {
+            try
+            {
+                using (lockeur.RecupererLockLecture())
+                {
+                    //todo nettoyer les états
+                    //todo gérer tags
+
+                    // Rempli les états avec ses transitions
+                    foreach (var kv in dicoEtatsInfos)
+                    {
+                        var etat = kv.Key;
+                        var infos = kv.Value;
+
+                        etat.TransitionsSortantes = infos.TransitionsSortantes.Transitions;
+                    }
+
+                    return Fabrique.Instance
+                        ?.RecupererInstance<IArbreLexical, IEnumerable<Etat>>(
+                            dicoEtatsInfos.Keys); 
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
         public Etat AjouterEtat()
         {
             try

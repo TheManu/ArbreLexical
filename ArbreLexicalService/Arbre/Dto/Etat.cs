@@ -29,6 +29,8 @@ namespace ArbreLexicalService.Arbre.Dto
             }
         }
 
+        public Transition[] TransitionsSortantes { get; internal set; }
+
         public override string ToString()
         {
             try

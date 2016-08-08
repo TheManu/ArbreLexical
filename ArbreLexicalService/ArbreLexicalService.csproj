@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Arbre\ArbreLexical.cs" />
     <Compile Include="Arbre\Cheminement\INavigation.cs" />
     <Compile Include="Arbre\Cheminement\INavigationSurSymboles.cs" />
     <Compile Include="Arbre\Cheminement\Navigation1SymboleBase.cs" />
@@ -52,7 +53,9 @@
     <Compile Include="Arbre\Dto\IEtatTransitionsSortantes.cs" />
     <Compile Include="Arbre\Dto\Transition.cs" />
     <Compile Include="Arbre\Dto\EtatTransitionsSortantes.cs" />
+    <Compile Include="Arbre\IArbreLexical.cs" />
     <Compile Include="Exceptions\ExceptionArbreConstruction.cs" />
+    <Compile Include="Ioc\ChargementIoc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

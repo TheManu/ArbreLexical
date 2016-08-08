@@ -258,5 +258,34 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .IsTrue(
                     (arbre as ArbreConstruction).Transitions.Contains(transition));
         }
+
+        [TestMethod]
+        public void FinaliserArbre()
+        {
+            // Préparations
+            IArbreConstruction constructeur = new ArbreConstruction();
+            var etatSource = constructeur.AjouterEtat();
+            var etatCible = constructeur.AjouterEtat();
+            var transition = constructeur.AjouterTransition(
+                etatSource,
+                etatCible);
+
+            // Action à vérifier
+            var arbre = constructeur.FinaliserArbre();
+
+            // Tests
+            Assert
+                .IsNotNull(arbre);
+            Assert
+                .AreEqual(
+                    2,
+                    arbre.Etats.Count());
+            Assert
+                .IsTrue(
+                    arbre.Etats.Any(e => e == etatSource && e.TransitionsSortantes.Count() == 1 && e.TransitionsSortantes.First() == transition));
+            Assert
+                .IsTrue(
+                    arbre.Etats.Any(e => e == etatCible && !e.TransitionsSortantes.Any()));
+        }
     }
 }

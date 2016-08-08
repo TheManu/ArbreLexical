@@ -35,5 +35,7 @@ namespace ArbreLexicalService.Arbre.Construction
         Transition AjouterTransition(
             Etat etatAvecReflexion,
             char? symbole);
+
+        IArbreLexical FinaliserArbre();
     }
 }

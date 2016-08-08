@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Exceptions;
+using Common.Ioc;
 
 namespace Common.Reflexion
 {
@@ -45,5 +46,32 @@ namespace Common.Reflexion
         {
             return RecupererNomMethode(-1);
         }
+
+        public static ClasseAttibut<T>[] RecupererClassesAvecAttribut<T>(
+            this IEnumerable<Assembly> composants)
+            where T : Attribute
+        {
+            return composants
+                .SelectMany(a =>
+                    a.GetTypes())
+                .Select(t =>
+                    new ClasseAttibut<T>
+                    {
+                        Classe = t,
+                        Attribut = t
+                            .GetCustomAttributes()
+                            .FirstOrDefault(a => a is T) as T
+                    })
+                .Where(o =>
+                    null != o.Attribut)
+                .ToArray();
+        }
+    }
+
+    public class ClasseAttibut<T>
+    {
+        public T Attribut { get; internal set; }
+
+        public Type Classe { get; internal set; }
     }
 }

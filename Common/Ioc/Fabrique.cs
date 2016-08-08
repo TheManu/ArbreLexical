@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Reflexion;
 using Common.Traces;
 using Jwc.Funz;
 
@@ -70,12 +71,16 @@ namespace Common.Ioc
         public void ChargerIocDepuisAssembly()
         {
             try
-            {                
-                var typesIoc = Assembly
-                    .GetExecutingAssembly()
-                    .GetTypes()
-                    .Where(o =>
-                        o.GetCustomAttributes().Any(a => a is IocAttribute));
+            {
+                var typesIoc = AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .RecupererClassesAvecAttribut<IocAttribute>()
+                    .OrderBy(o =>
+                        o.Attribut.NiveauCouche)
+                    .ThenBy(o =>
+                        o.Attribut.PrioriteDansCouche)
+                    .Select(o =>
+                        o.Classe);
 
                 foreach (var typeIoc in typesIoc)
                 {
