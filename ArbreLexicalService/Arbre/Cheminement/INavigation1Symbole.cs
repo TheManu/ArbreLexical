@@ -9,9 +9,22 @@ namespace ArbreLexicalService.Arbre.Cheminement
 {
     public interface INavigation1Symbole : INavigation
     {
-        Transition[] TransitionsParSymbole
+        bool ForcerNettoyage
         {
             get;
+            set;
+        }
+
+        bool ForcerTransitionsSansSymboleEnEntree
+        {
+            get;
+            set;
+        }
+
+        bool ForcerTransitionsSansSymboleEnSortie
+        {
+            get;
+            set;
         }
     }
 }

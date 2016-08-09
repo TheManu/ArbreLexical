@@ -159,7 +159,7 @@ namespace ArbreLexicalService.Arbre.Construction
                     bool etatCibleDansArbre = dicoEtatsInfos
                         .TryGetValue(
                             etatCible,
-                            out etatInfosCible); ;
+                            out etatInfosCible);
 
                     if (!etatSourceDansArbre ||
                         !etatCibleDansArbre)

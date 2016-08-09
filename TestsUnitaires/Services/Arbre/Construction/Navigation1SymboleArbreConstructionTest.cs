@@ -148,6 +148,8 @@ namespace TestsUnitaires.Services.Arbre.Construction
             var navigateur = (arbre as ArbreConstruction)
                 .RecupererNavigateurSur(
                     etat1);
+            navigateur
+                .ForcerTransitionsSansSymboleEnSortie = false;
 
             // Action à vérifier
             navigateur
@@ -163,6 +165,28 @@ namespace TestsUnitaires.Services.Arbre.Construction
             Assert
                 .IsTrue(
                     navigateur.EtatsOrigine.Contains(etat1));
+
+            // Tests sur les états courants
+            Assert
+                .AreEqual(
+                    1,
+                    navigateur.EtatsCourants.Count());
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(etat4));
+
+            // Tests sur les transitions
+            Assert
+                .AreEqual(
+                    1,
+                    navigateur.Transitions.Count());
+            Assert
+                .IsTrue(
+                    navigateur.Transitions.Any(t => t.EtatSource == etat1 && t.EtatCible == etat4));
+
+            // + Transitions sans symbole
+            navigateur
+                .TransitionsSansSymbole();
 
             // Tests sur les états courants
             Assert
@@ -187,13 +211,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
             Assert
                 .IsTrue(
                     navigateur.Transitions.Any(t => t.EtatSource == etat4 && t.EtatCible == etat5));
-            Assert
-                .AreEqual(
-                    1,
-                    navigateur.TransitionsParSymbole.Count());
-            Assert
-                .IsTrue(
-                    navigateur.TransitionsParSymbole.Any(t => t.EtatSource == etat1 && t.EtatCible == etat4));
         }
 
         [TestMethod]
@@ -231,10 +248,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .AreEqual(
                     0,
                     navigateur.Transitions.Count());
-            Assert
-                .AreEqual(
-                    0,
-                    navigateur.TransitionsParSymbole.Count());
         }
 
         [TestMethod]
@@ -270,10 +283,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .AreEqual(
                     0,
                     navigateur.Transitions.Count());
-            Assert
-                .AreEqual(
-                    0,
-                    navigateur.TransitionsParSymbole.Count());
         }
 
         [TestMethod]
@@ -427,10 +436,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .AreEqual(
                     0,
                     navigateur.Transitions.Count());
-            Assert
-                .AreEqual(
-                    0,
-                    navigateur.TransitionsParSymbole.Count());
         }
 
         [TestMethod]
@@ -465,10 +470,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .AreEqual(
                     0,
                     navigateur.Transitions.Count());
-            Assert
-                .AreEqual(
-                    0,
-                    navigateur.TransitionsParSymbole.Count());
         }
 
         #endregion Public Methods

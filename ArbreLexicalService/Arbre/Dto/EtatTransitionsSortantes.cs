@@ -10,10 +10,26 @@ namespace ArbreLexicalService.Arbre.Dto
 {
     internal class EtatTransitionsSortantes : IEtatTransitionsSortantes
     {
+        #region Private Fields
+
         private readonly Etat etat;
 
         private readonly List<Transition> transitions =
             new List<Transition>();
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        public EtatTransitionsSortantes(
+            Etat etat)
+        {
+            this.etat = etat;
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
 
         public Transition[] Transitions
         {
@@ -24,11 +40,9 @@ namespace ArbreLexicalService.Arbre.Dto
             }
         }
 
-        public EtatTransitionsSortantes(
-            Etat etat)
-        {
-            this.etat = etat;
-        }
+        #endregion Public Properties
+
+        #region Public Methods
 
         public IEtatTransitionsSortantes Ajouter(
             Transition transition)
@@ -42,60 +56,6 @@ namespace ArbreLexicalService.Arbre.Dto
                 }
 
                 return this;
-            }
-            catch (Exception ex)
-            {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
-                    ex);
-            }
-        }
-
-        public IEtatTransitionsSortantes Supprimer(
-            Transition transition)
-        {
-            try
-            {
-                if (transitions.Contains(transition))
-                {
-                    transitions.Remove(
-                        transition);
-                }
-                else
-                {
-                    throw new ExceptionTechnique(
-                        ExceptionBase.RecupererLibelleErreur(
-                            $"Impossible de supprimer la transition {transition}"));
-                }
-
-                return this;
-            }
-            catch (Exception ex)
-            {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
-                    ex);
-            }
-        }
-
-        public Transition RecupererTransitionEquivalente(
-            Transition transition)
-        {
-            try
-            {
-                return transitions
-                    .FirstOrDefault(t =>
-                        t.EstEquivalentA(transition));
             }
             catch (Exception ex)
             {
@@ -133,6 +93,28 @@ namespace ArbreLexicalService.Arbre.Dto
             }
         }
 
+        public Transition RecupererTransitionEquivalente(
+            Transition transition)
+        {
+            try
+            {
+                return transitions
+                    .FirstOrDefault(t =>
+                        t.EstEquivalentA(transition));
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionTechnique(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
         public Transition[] RecupererTransitionsSansSymbole()
         {
             try
@@ -154,5 +136,39 @@ namespace ArbreLexicalService.Arbre.Dto
                     ex);
             }
         }
+
+        public IEtatTransitionsSortantes Supprimer(
+                                    Transition transition)
+        {
+            try
+            {
+                if (transitions.Contains(transition))
+                {
+                    transitions.Remove(
+                        transition);
+                }
+                else
+                {
+                    throw new ExceptionTechnique(
+                        ExceptionBase.RecupererLibelleErreur(
+                            $"Impossible de supprimer la transition {transition}"));
+                }
+
+                return this;
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionTechnique(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        #endregion Public Methods
     }
 }

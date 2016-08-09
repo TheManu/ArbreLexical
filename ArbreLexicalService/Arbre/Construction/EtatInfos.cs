@@ -17,12 +17,13 @@ namespace ArbreLexicalService.Arbre.Construction
         #region Public Constructors
 
         public EtatInfos(
-                    Etat etatOrigine)
+            Etat etatOrigine)
         {
             this.etatOrigine = etatOrigine;
 
-            transitionsSortantes = new EtatTransitionsSortantes(
-                etatOrigine);
+            transitionsSortantes = Fabrique.Instance
+                .RecupererInstance<IEtatTransitionsSortantes, Etat>(
+                    etatOrigine);
         }
 
         #endregion Public Constructors

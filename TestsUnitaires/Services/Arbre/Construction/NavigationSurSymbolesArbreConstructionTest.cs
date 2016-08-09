@@ -229,31 +229,23 @@ namespace TestsUnitaires.Services.Arbre.Construction
             // Tests sur les transitions
             Assert
                 .AreEqual(
-                    5,
-                    navigateur.TransitionsParSymboles.Count());
-            Assert
-                .IsTrue(
-                    navigateur.TransitionsParSymboles.Any(t => t.EtatSource == etat1 && t.EtatCible == etat1));
-            Assert
-                .IsTrue(
-                    navigateur.TransitionsParSymboles.Any(t => t.EtatSource == etat1 && t.EtatCible == etat4 && t.Symbole == symbole1));
-            Assert
-                .IsTrue(
-                    navigateur.TransitionsParSymboles.Any(t => t.EtatSource == etat4 && t.EtatCible == etat4));
-            Assert
-                .IsTrue(
-                    navigateur.TransitionsParSymboles.Any(t => t.EtatSource == etat4 && t.EtatCible == etat5));
-            Assert
-                .IsTrue(
-                    navigateur.TransitionsParSymboles.Any(t => t.EtatSource == etat5 && t.EtatCible == etat6 && t.Symbole == symbole2));
-            Assert
-                .AreEqual(
                     6,
                     navigateur.Transitions.Count());
             Assert
-                .AreEqual(
-                    1,
-                    navigateur.Transitions.Except(navigateur.TransitionsParSymboles).Count());
+                .IsTrue(
+                    navigateur.Transitions.Any(t => t.EtatSource == etat1 && t.EtatCible == etat1));
+            Assert
+                .IsTrue(
+                    navigateur.Transitions.Any(t => t.EtatSource == etat1 && t.EtatCible == etat4 && t.Symbole == symbole1));
+            Assert
+                .IsTrue(
+                    navigateur.Transitions.Any(t => t.EtatSource == etat4 && t.EtatCible == etat4));
+            Assert
+                .IsTrue(
+                    navigateur.Transitions.Any(t => t.EtatSource == etat4 && t.EtatCible == etat5));
+            Assert
+                .IsTrue(
+                    navigateur.Transitions.Any(t => t.EtatSource == etat5 && t.EtatCible == etat6 && t.Symbole == symbole2));
             Assert
                 .IsTrue(
                     navigateur.Transitions.Any(t => t.EtatSource == etat6 && t.EtatCible == etat7));

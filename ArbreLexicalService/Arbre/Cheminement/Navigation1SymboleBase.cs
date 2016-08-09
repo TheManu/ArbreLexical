@@ -22,9 +22,17 @@ namespace ArbreLexicalService.Arbre.Cheminement
 
         protected Etat[] etatsOrigine;
 
-        private Transition[] transitionsParSymbole;
-
         #endregion Protected Fields
+
+        #region Private Fields
+
+        private bool forcerNettoyage = true;
+
+        private bool forcerTransitionsSansSymboleEnEntree = true;
+
+        private bool forcerTransitionsSansSymboleEnSortie = true;
+
+        #endregion Private Fields
 
         #region Public Constructors
 
@@ -58,26 +66,51 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
         }
 
+        public bool ForcerNettoyage
+        {
+            get
+            {
+                return forcerNettoyage;
+            }
+
+            set
+            {
+                forcerNettoyage = value;
+            }
+        }
+
+        public bool ForcerTransitionsSansSymboleEnEntree
+        {
+            get
+            {
+                return forcerTransitionsSansSymboleEnEntree;
+            }
+
+            set
+            {
+                forcerTransitionsSansSymboleEnEntree = value;
+            }
+        }
+
+        public bool ForcerTransitionsSansSymboleEnSortie
+        {
+            get
+            {
+                return forcerTransitionsSansSymboleEnSortie;
+            }
+
+            set
+            {
+                forcerTransitionsSansSymboleEnSortie = value;
+            }
+        }
+
         public Transition[] Transitions
         {
             get
             {
                 return transitions
                     .ToArray();
-            }
-        }
-
-        public Transition[] TransitionsParSymbole
-        {
-            get
-            {
-                return transitionsParSymbole 
-                    ?? new Transition[0];
-            }
-
-            set
-            {
-                transitionsParSymbole = value;
             }
         }
 
@@ -140,15 +173,44 @@ namespace ArbreLexicalService.Arbre.Cheminement
         {
             try
             {
-                etatsCourants = EtatsOrigine;
+                etatsCourants = EtatsCourants;
 
-                TransitionSansSymboleMultiNiveaux();
+                if (forcerTransitionsSansSymboleEnEntree)
+                {
+                    TransitionSansSymboleMultiNiveaux(); 
+                }
 
                 var transitionsAvecSymbole = TransitionPar1Niveau(
                     symbole);
-                NettoyerTransitionsApresTransitionAvecSymbole(
-                    transitionsAvecSymbole);
+                if (forcerNettoyage)
+                {
+                    NettoyerTransitionsEtEtatsOrigine(
+                        transitionsAvecSymbole); 
+                }
 
+                if (forcerTransitionsSansSymboleEnSortie)
+                {
+                    TransitionSansSymboleMultiNiveaux(); 
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionTechnique(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        public void TransitionsSansSymbole()
+        {
+            try
+            {
+                etatsCourants = EtatsCourants;
                 TransitionSansSymboleMultiNiveaux();
             }
             catch (Exception ex)
@@ -164,7 +226,11 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
         }
 
-        private void NettoyerTransitionsApresTransitionAvecSymbole(
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected void NettoyerTransitionsEtEtatsOrigine(
             IEnumerable<Transition> transitionsAvecSymbole)
         {
             try
@@ -198,13 +264,20 @@ namespace ArbreLexicalService.Arbre.Cheminement
                         }
                         while (transitionsAAnalyser.Any());
 
-                        transitionsParSymbole = transitionsAGarder
+                        // Nettoyage des transitions
+                        var transitionsParSymbole = transitionsAGarder
                             .Distinct()
                             .ToArray();
                         transitions
                             .Clear();
                         transitions
                             .AddRange(transitionsParSymbole);
+
+                        // Nettoyage des états en origine
+                        etatsOrigine = EtatsOrigine
+                            .Intersect(
+                                transitionsParSymbole.Select(t => t.EtatSource))
+                            .ToArray();
                     }
                     else
                     {
@@ -225,32 +298,8 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
         }
 
-        public void TransitionsSansSymbole()
-        {
-            try
-            {
-                etatsCourants = EtatsOrigine;
-                TransitionSansSymboleMultiNiveaux();
-            }
-            catch (Exception ex)
-            {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
-                    ex);
-            }
-        }
-
-        #endregion Public Methods
-
-        #region Protected Methods
-
         protected abstract Transition RecupererTransitionAvecSymbole(
-            Etat etatSource,
+                    Etat etatSource,
             char symbole);
 
         protected abstract Transition[] RecupererTransitionsSansSymbole(
@@ -378,7 +427,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
                         transitions
                             .AjouterSaufSiStocke(
                                 transitionsAAjouter);
-                    } 
+                    }
                 }
             }
             catch (Exception ex)
@@ -395,6 +444,5 @@ namespace ArbreLexicalService.Arbre.Cheminement
         }
 
         #endregion Protected Methods
-
     }
 }
