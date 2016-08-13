@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ArbreLexicalService.Arbre;
 using ArbreLexicalService.Arbre.Construction;
+using ArbreLexicalService.Arbre.Construction.Elements;
 using ArbreLexicalService.Arbre.Dto;
 using Common.Ioc;
 using Common.Traces;
@@ -20,14 +21,21 @@ namespace ArbreLexicalService.Ioc
         {
             try
             {
-                fabrique.Enregistrer<IArbreLexical, IEnumerable<Etat>>(etats =>
-                    new ArbreLexical(etats));
+                fabrique
+                    .Enregistrer<IArbreLexical, IEnumerable<Etat>>(etats =>
+                        new ArbreLexical(etats));
 
-                fabrique.Enregistrer<IArbreConstruction>(() =>
-                    new ArbreConstruction());
+                fabrique
+                    .Enregistrer<IArbreConstruction>(() =>
+                        new ArbreConstruction());
 
-                fabrique.Enregistrer<IEtatTransitionsSortantes, Etat>(e =>
-                    new EtatTransitionsSortantes(e));
+                fabrique
+                    .Enregistrer<IEtatTransitionsSortantes, Etat>(e =>
+                        new EtatTransitionsSortantes(e));
+
+                fabrique
+                    .Enregistrer<IConstructionElementArbre, IArbreConstruction>(a =>
+                        new ConstructionElementArbre(a));
             }
             catch (Exception ex)
             {

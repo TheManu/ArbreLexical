@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ArbreLexicalService.Arbre.Cheminement;
+using ArbreLexicalService.Arbre.Construction.Elements;
 using ArbreLexicalService.Arbre.Dto;
 using ArbreLexicalService.Exceptions;
 using Common.Collections;
@@ -22,12 +23,34 @@ namespace ArbreLexicalService.Arbre.Construction
         private readonly Dictionary<Etat, EtatInfos> dicoEtatsInfos =
             new Dictionary<Etat, EtatInfos>();
 
+        private readonly Etat etatEntree;
+
+        private readonly Etat etatSortie;
+
         private readonly ILockLectureEtEcriture lockeur =
-            Fabrique.Instance.RecupererInstance<ILockLectureEtEcriture>();
+                            Fabrique.Instance.RecupererInstance<ILockLectureEtEcriture>();
 
         #endregion Private Fields
 
+        #region Public Constructors
+
+        public ArbreConstruction()
+        {
+            etatEntree = AjouterEtatDansConstructeur();
+            etatSortie = AjouterEtatDansConstructeur();
+        }
+
+        #endregion Public Constructors
+
         #region Public Properties
+
+        public Etat EtatEntree
+        {
+            get
+            {
+                return etatEntree;
+            }
+        }
 
         public Etat[] Etats
         {
@@ -39,6 +62,14 @@ namespace ArbreLexicalService.Arbre.Construction
                         .Keys
                         .ToArray();
                 }
+            }
+        }
+
+        public Etat EtatSortie
+        {
+            get
+            {
+                return etatSortie;
             }
         }
 
@@ -62,28 +93,33 @@ namespace ArbreLexicalService.Arbre.Construction
 
         #region Public Methods
 
-        public IArbreLexical FinaliserArbre()
+        public Transition[] AjouterChemin(
+            Etat etatDebut,
+            string chemin)
         {
             try
             {
-                using (lockeur.RecupererLockLecture())
+                var transitions = new List<Transition>();
+
+                if (!string.IsNullOrEmpty(chemin))
                 {
-                    //todo nettoyer les états
-                    //todo gérer tags
-
-                    // Rempli les états avec ses transitions
-                    foreach (var kv in dicoEtatsInfos)
+                    foreach (var symbole in chemin)
                     {
-                        var etat = kv.Key;
-                        var infos = kv.Value;
+                        var etat = AjouterEtat();
 
-                        etat.TransitionsSortantes = infos.TransitionsSortantes.Transitions;
+                        var transition = AjouterTransition(
+                            etatDebut,
+                            etat,
+                            symbole);
+                        transitions
+                            .Add(transition);
+
+                        etatDebut = etat;
                     }
-
-                    return Fabrique.Instance
-                        ?.RecupererInstance<IArbreLexical, IEnumerable<Etat>>(
-                            dicoEtatsInfos.Keys); 
                 }
+
+                return transitions
+                    .ToArray();
             }
             catch (Exception ex)
             {
@@ -207,6 +243,20 @@ namespace ArbreLexicalService.Arbre.Construction
                         else
                         { // La transition n'existe pas encore => ajout
 
+                            if (!etatInfosSource.AjoutTransitionSortantePossible)
+                            {
+                                throw new ExceptionArbreConstruction(
+                                    ExceptionBase.RecupererLibelleErreur(
+                                        $"L'ajout d'une transition sortante sur l'état {etatInfosCible.EtatOrigine.Identifiant} est interdit"));
+                            }
+
+                            if (!etatInfosCible.AjoutTransitionEntrantePossible)
+                            {
+                                throw new ExceptionArbreConstruction(
+                                    ExceptionBase.RecupererLibelleErreur(
+                                        $"L'ajout d'une transition entrante sur l'état {etatInfosCible.EtatOrigine.Identifiant} est interdit"));
+                            }
+
                             if (symbole.HasValue)
                             { // Ajout d'une transition avec symbole
 
@@ -315,6 +365,107 @@ namespace ArbreLexicalService.Arbre.Construction
                 symbole);
         }
 
+        public IConstructionElementArbre CreerElement(
+            IEnumerable<Etat> etatsConnexionDebut,
+            IEnumerable<Etat> etatsConnexionFin)
+        {
+            try
+            {
+                var element = CreerElement();
+
+                if (null != etatsConnexionDebut)
+                {
+                    foreach (var etatSource in etatsConnexionDebut)
+                    {
+                        AjouterTransition(
+                            etatSource,
+                            element.EtatEntree);
+                    }
+                }
+
+                if (null != etatsConnexionFin)
+                {
+                    foreach (var etatCible in etatsConnexionFin)
+                    {
+                        AjouterTransition(
+                            element.EtatSortie,
+                            etatCible);
+                    }
+                }
+
+                return element;
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        public IConstructionElementArbre CreerElement(
+            IEnumerable<Etat> etatsConnexionDebut)
+        {
+            try
+            {
+                return CreerElement(
+                    etatsConnexionDebut,
+                    null);
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        public IArbreLexical FinaliserArbre()
+        {
+            try
+            {
+                using (lockeur.RecupererLockLecture())
+                {
+                    //todo nettoyer les états
+                    //todo gérer tags
+
+                    // Rempli les états avec ses transitions
+                    foreach (var kv in dicoEtatsInfos)
+                    {
+                        var etat = kv.Key;
+                        var infos = kv.Value;
+
+                        etat.TransitionsSortantes = infos.TransitionsSortantes.Transitions;
+                    }
+
+                    return Fabrique.Instance
+                        ?.RecupererInstance<IArbreLexical, IEnumerable<Etat>>(
+                            dicoEtatsInfos.Keys);
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
         #endregion Public Methods
 
         #region Internal Methods
@@ -335,52 +486,6 @@ namespace ArbreLexicalService.Arbre.Construction
                 }
 
                 return etatInfos;
-            }
-            catch (Exception ex)
-            {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
-                    ex);
-            }
-        }
-
-        internal INavigation1Symbole RecupererNavigateurSur(
-            params Etat[] etats)
-        {
-            try
-            {
-                return RecupererNavigateurSur(
-                    etats.AsEnumerable());
-            }
-            catch (Exception ex)
-            {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
-                    ex);
-            }
-        }
-
-        internal INavigation1Symbole RecupererNavigateurSur(
-            IEnumerable<Etat> etatsOrigine)
-        {
-            try
-            {
-                var navigateur = new Navigation1Symbole(
-                    this);
-                navigateur
-                    .DefinirEtatsOrigine(etatsOrigine);
-
-                return navigateur;
             }
             catch (Exception ex)
             {
@@ -441,6 +546,52 @@ namespace ArbreLexicalService.Arbre.Construction
             }
         }
 
+        internal INavigation1Symbole RecupererNavigateurSur(
+            params Etat[] etats)
+        {
+            try
+            {
+                return RecupererNavigateurSur(
+                    etats.AsEnumerable());
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        internal INavigation1Symbole RecupererNavigateurSur(
+            IEnumerable<Etat> etatsOrigine)
+        {
+            try
+            {
+                var navigateur = new Navigation1Symbole(
+                    this);
+                navigateur
+                    .DefinirEtatsOrigine(etatsOrigine);
+
+                return navigateur;
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
         #endregion Internal Methods
 
         #region Private Methods
@@ -478,6 +629,7 @@ namespace ArbreLexicalService.Arbre.Construction
                 .Select(ei => ei.Lockeur)
                 .ToArray();
         }
+
         private EtatInfos Ajouter(
             EtatInfos etatInfos)
         {
@@ -517,6 +669,20 @@ namespace ArbreLexicalService.Arbre.Construction
             }
         }
 
+        private Etat AjouterEtatDansConstructeur()
+        {
+            var etat = new Etat();
+            var etatInfos = new EtatInfos(
+                etat);
+            etatInfos.EstActif = true;
+
+            dicoEtatsInfos
+                .Add(
+                    etat,
+                    etatInfos);
+
+            return etat;
+        }
         private EtatInfos AjouterEtatEtSesInfos()
         {
             try
@@ -525,6 +691,31 @@ namespace ArbreLexicalService.Arbre.Construction
 
                 return Ajouter(
                     etatInfos);
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        private IConstructionElementArbre CreerElement()
+        {
+            try
+            {
+                var element = Fabrique.Instance
+                    .RecupererInstance<IConstructionElementArbre, IArbreConstruction>(
+                        this);
+                element
+                    .CreerAsync();
+
+                return element;
             }
             catch (Exception ex)
             {

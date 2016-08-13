@@ -4,15 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Exceptions;
 using Common.Ioc;
 
 namespace ArbreLexicalService.Arbre.Dto
 {
     public class Etat
     {
+        #region Private Fields
+
         private static int identifiantMax = 0;
 
         private readonly int identifiant;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public Etat()
         {
@@ -20,6 +27,10 @@ namespace ArbreLexicalService.Arbre.Dto
                 .Increment(
                     ref identifiantMax);
         }
+
+        #endregion Public Constructors
+
+        #region Public Properties
 
         public int Identifiant
         {
@@ -29,7 +40,15 @@ namespace ArbreLexicalService.Arbre.Dto
             }
         }
 
-        public Transition[] TransitionsSortantes { get; internal set; }
+        public Transition[] TransitionsSortantes
+        {
+            get;
+            internal set;
+        }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         public override string ToString()
         {
@@ -47,5 +66,7 @@ namespace ArbreLexicalService.Arbre.Dto
 
             return base.ToString();
         }
+
+        #endregion Public Methods
     }
 }

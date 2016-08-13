@@ -1,0 +1,29 @@
+﻿[
+  { chemin: "abc" },
+  { chemin: "ade" },
+  {
+    repetition: {
+      "min": 5,
+      "max": 10,
+      "item": [
+        { chemin: "012" },
+        {
+          choix: [
+            { chemin: "345" },
+            { chemin: "678" },
+            [
+              {"chemin":  "901"}
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  {
+    repetition: {
+      "min": 0,
+      "max": 2,
+      "item": { chemin: "wxc" }
+    }
+  }
+]

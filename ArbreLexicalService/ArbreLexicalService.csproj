@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,8 +51,22 @@
     <Compile Include="Arbre\Cheminement\INavigation1Symbole.cs" />
     <Compile Include="Arbre\Cheminement\NavigationSurSymbolesBase.cs" />
     <Compile Include="Arbre\Construction\ArbreConstruction.cs" />
+    <Compile Include="Arbre\Construction\Dto\ChoixElementsConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\Dto\ElementCheminConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\Dto\ElementConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\Dto\ElementRepetitionConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\Dto\SequenceElementsConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\EnumTypeElement.cs" />
+    <Compile Include="Arbre\Construction\FabriqueArbre.cs" />
+    <Compile Include="Arbre\Construction\FabriqueArbreDepuisJson.cs" />
+    <Compile Include="Arbre\Construction\Elements\ConstructionElementArbre.cs" />
+    <Compile Include="Arbre\Construction\Elements\ConstructionMultiChoixSurArbre.cs" />
+    <Compile Include="Arbre\Construction\Elements\IConstructionElementArbre.cs" />
     <Compile Include="Arbre\Construction\EtatInfos.cs" />
     <Compile Include="Arbre\Construction\IArbreConstruction.cs" />
+    <Compile Include="Arbre\Construction\IDeserialisateurElement.cs" />
+    <Compile Include="Arbre\Construction\IFabriqueArbre.cs" />
+    <Compile Include="Arbre\Construction\IFabriqueArbreDepuisJson.cs" />
     <Compile Include="Arbre\Dto\Etat.cs" />
     <Compile Include="Arbre\Dto\IEtatTransitionsSortantes.cs" />
     <Compile Include="Arbre\Dto\Transition.cs" />
@@ -64,7 +82,9 @@
       <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -277,10 +277,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
             Assert
                 .IsNotNull(arbre);
             Assert
-                .AreEqual(
-                    2,
-                    arbre.Etats.Count());
-            Assert
                 .IsTrue(
                     arbre.Etats.Any(e => e == etatSource && e.TransitionsSortantes.Count() == 1 && e.TransitionsSortantes.First() == transition));
             Assert
