@@ -187,6 +187,33 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
         }
 
+        public void TransitionPar(
+            string symboles)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(symboles))
+                {
+                    foreach (var symbole in symboles)
+                    {
+                        TransitionPar(
+                            symbole);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionTechnique(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
         private class Navigation1Symbole : Navigation1SymboleBase
         {
             protected override Transition RecupererTransitionAvecSymbole(

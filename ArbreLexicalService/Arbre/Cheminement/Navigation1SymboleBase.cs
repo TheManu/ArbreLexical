@@ -356,7 +356,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
         {
             try
             {
-                Etat[] etatsNiveauPrecedent = null;
+                var etatsArriveePrecedents = new List<Etat[]>();
                 var etatsDejaAnalyses = new Dictionary<Etat, Transition[]>();
                 var transitionsAAjouter = new List<Transition>();
                 var etatsAAnalyser = etatsCourants;
@@ -388,7 +388,15 @@ namespace ArbreLexicalService.Arbre.Cheminement
 
                         if (transitionsSansSymbole.Any())
                         {
-                            etatsNiveauPrecedent = etatsAAnalyser;
+                            if (!etatsArriveePrecedents.Any() || 
+                                etatsArriveePrecedents.All(tab => !tab.EstIdentique(etatsAAnalyser)))
+                            { // On sauvegarde les états qui viennent d'être analysés
+
+                                etatsArriveePrecedents
+                                    .Add(etatsAAnalyser);
+                            }
+
+                            // Calcul des états d'arrivée par les transitions récupérées
                             etatsAAnalyser = transitionsSansSymbole
                                 .Select(t =>
                                     t.EtatCible)
@@ -399,13 +407,15 @@ namespace ArbreLexicalService.Arbre.Cheminement
                                 .AjouterSaufSiStocke(
                                     transitionsSansSymbole.Distinct());
 
-                            if (etatsAAnalyser.EstIdentique(etatsNiveauPrecedent))
-                            {
+                            if (etatsArriveePrecedents.Any(tab => tab.EstIdentique(etatsAAnalyser)))
+                            { // Les états d'arrivée ont déjà été analysés
+
                                 break;
                             }
                         }
                         else
-                        {
+                        { // Il n'y a pas de transition récupérée ni d'état en arrivée
+                            
                             break;
                         }
                     }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ArbreLexicalService.Arbre.Construction.Dto;
 using ArbreLexicalService.Exceptions;
 using Common.Exceptions;
+using Common.Helpers;
 using Common.Ioc;
 using Newtonsoft.Json.Linq;
 
@@ -22,6 +23,11 @@ namespace ArbreLexicalService.Arbre.Construction
         #endregion Private Fields
 
         #region Public Constructors
+
+        public FabriqueArbreDepuisJson(
+            IArbreConstruction arbre) : this(arbre, null)
+        {
+        }
 
         public FabriqueArbreDepuisJson(
             IArbreConstruction arbre,
@@ -113,11 +119,11 @@ namespace ArbreLexicalService.Arbre.Construction
             {
                 if (!string.IsNullOrWhiteSpace(jsonStr))
                 {
-                    var jArray = JArray
+                    var jToken = JToken
                         .Parse(jsonStr);
 
                     var deserialisateur = new Deserialisateur(
-                        jArray);
+                        jToken);
 
                     elementsConstruction = deserialisateur
                         .Deserialiser(); 
@@ -147,8 +153,9 @@ namespace ArbreLexicalService.Arbre.Construction
 
             private const string NOM_PROPRIETE_CHEMIN = "chemin";
             private const string NOM_PROPRIETE_CHOIX = "choix";
+            private const string NOM_PROPRIETE_ETIQUETTE = "etiquette";
+            private const string NOM_PROPRIETE_REFERENCE = "ref";
             private const string NOM_PROPRIETE_REPETITION = "repetition";
-
             private readonly JToken jTokenRacine;
 
             #endregion Private Fields
@@ -272,10 +279,75 @@ namespace ArbreLexicalService.Arbre.Construction
                                 return DeserialiserRepetitionElement(
                                     jItem as JObject);
                             }
+                            else
+                            {
+                                if (jObject.TryGetValue(NOM_PROPRIETE_ETIQUETTE, out jItem))
+                                {
+                                    return DeserialiserElementEtiquette(
+                                        jItem as JObject);
+                                }
+                                else
+                                {
+                                    if (jObject.TryGetValue(NOM_PROPRIETE_REFERENCE, out jItem))
+                                    {
+                                        return new ElementReferenceConstructionDto(
+                                            (jItem as JValue).Value<string>());
+                                    }
+                                }
+                            }
                         }
                     }
 
                     throw new ExceptionArbreConstruction();
+                }
+                catch (Exception ex)
+                {
+                    Fabrique.Instance
+                        ?.RecupererGestionnaireTraces()
+                        ?.PublierException(
+                            ex);
+
+                    throw new ExceptionArbreConstruction(
+                        ExceptionBase.RecupererLibelleErreur(),
+                        ex);
+                }
+            }
+
+            private ElementConstructionDto DeserialiserElementEtiquette(
+                JObject jObject)
+            {
+                try
+                {
+                    JToken jToken;
+                    ElementConstructionDto enfant;
+
+                    if (jObject.TryGetValue("item", out jToken))
+                    {
+                        enfant = Deserialiser(
+                            jToken);
+                    }
+                    else
+                    {
+                        enfant = new ElementCheminConstructionDto(
+                            string.Empty);
+                    }
+
+                    var id = jObject.TryGetValue("id", out jToken) ?
+                        jToken.Value<string>() :
+                        null;
+
+                    var typeInt = jObject.TryGetValue("type", out jToken) ?
+                        jToken.Value<int>() :
+                        (int)EnumTypeBlock.Reference;
+                    var type = EnumHelper
+                        .RecupererEnum<EnumTypeBlock>(
+                            typeInt,
+                            EnumTypeBlock.Reference);
+
+                    return new ElementEtiquetteConstructionDto(                        
+                        type,
+                        id,
+                        enfant);
                 }
                 catch (Exception ex)
                 {

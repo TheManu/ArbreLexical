@@ -54,8 +54,11 @@
     <Compile Include="Arbre\Construction\Dto\ChoixElementsConstructionDto.cs" />
     <Compile Include="Arbre\Construction\Dto\ElementCheminConstructionDto.cs" />
     <Compile Include="Arbre\Construction\Dto\ElementConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\Dto\ElementEtiquetteConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\Dto\ElementReferenceConstructionDto.cs" />
     <Compile Include="Arbre\Construction\Dto\ElementRepetitionConstructionDto.cs" />
     <Compile Include="Arbre\Construction\Dto\SequenceElementsConstructionDto.cs" />
+    <Compile Include="Arbre\Construction\EnumTypeBlock.cs" />
     <Compile Include="Arbre\Construction\EnumTypeElement.cs" />
     <Compile Include="Arbre\Construction\FabriqueArbre.cs" />
     <Compile Include="Arbre\Construction\FabriqueArbreDepuisJson.cs" />

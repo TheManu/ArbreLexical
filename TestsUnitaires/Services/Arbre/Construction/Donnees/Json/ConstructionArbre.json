@@ -1,29 +1,288 @@
-﻿[
-  { chemin: "abc" },
-  { chemin: "ade" },
-  {
-    repetition: {
-      "min": 5,
-      "max": 10,
-      "item": [
-        { chemin: "012" },
-        {
-          choix: [
-            { chemin: "345" },
-            { chemin: "678" },
-            [
-              {"chemin":  "901"}
-            ]
+﻿{
+  "choix": [
+    {
+      "etiquette": {
+        "id": "lettreMin",
+        "item": {
+          "choix": [
+            { chemin: "a" },
+            { chemin: "b" },
+            { chemin: "c" },
+            { chemin: "d" },
+            { chemin: "e" },
+            { chemin: "f" },
+            { chemin: "g" },
+            { chemin: "h" },
+            { chemin: "i" },
+            { chemin: "j" },
+            { chemin: "k" },
+            { chemin: "l" },
+            { chemin: "m" },
+            { chemin: "n" },
+            { chemin: "o" },
+            { chemin: "p" },
+            { chemin: "q" },
+            { chemin: "r" },
+            { chemin: "s" },
+            { chemin: "t" },
+            { chemin: "v" },
+            { chemin: "w" },
+            { chemin: "x" },
+            { chemin: "y" },
+            { chemin: "z" }
           ]
         }
-      ]
-    }
-  },
-  {
-    repetition: {
-      "min": 0,
-      "max": 2,
-      "item": { chemin: "wxc" }
-    }
-  }
-]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "lettreMaj",
+        "item": {
+          "choix": [
+            { chemin: "A" },
+            { chemin: "B" },
+            { chemin: "C" },
+            { chemin: "D" },
+            { chemin: "E" },
+            { chemin: "F" },
+            { chemin: "G" },
+            { chemin: "H" },
+            { chemin: "I" },
+            { chemin: "J" },
+            { chemin: "K" },
+            { chemin: "L" },
+            { chemin: "M" },
+            { chemin: "N" },
+            { chemin: "O" },
+            { chemin: "P" },
+            { chemin: "Q" },
+            { chemin: "R" },
+            { chemin: "S" },
+            { chemin: "T" },
+            { chemin: "V" },
+            { chemin: "W" },
+            { chemin: "X" },
+            { chemin: "Y" },
+            { chemin: "Z" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "lettresMinEtMaj",
+        "item": {
+          "repetition": {
+            "min": 1,
+            "item": {
+              "choix": [
+                { "ref": "lettreMin" },
+                { "ref": "lettreMaj" }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "nomVariable",
+        "type": 0,
+        "item": {
+          "repetition": {
+            "min": 1,
+            "item": [
+              {
+                "repetition": {
+                  "min": 0,
+                  "item": {
+                    "chemin": "_"
+                  }
+                }
+              },
+              {
+                "repetition": {
+                  "min": 1,
+                  "item": {
+                    "ref": "lettresMinEtMaj"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "chiffre",
+        "item": {
+          "choix": [
+            { chemin: "0" },
+            { chemin: "1" },
+            { chemin: "2" },
+            { chemin: "3" },
+            { chemin: "4" },
+            { chemin: "5" },
+            { chemin: "6" },
+            { chemin: "7" },
+            { chemin: "8" },
+            { chemin: "9" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "nombre",
+        "item": {
+          "repetition": {
+            "min": 1,
+            "item": {
+              "ref": "chiffre"
+            }
+          }
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "booleen",
+        "type": 0,
+        "item": {
+          "repetition": {
+            "min": 1,
+            "item": {
+              "choix": [
+                { "chemin": "true" },
+                { "chemin": "false" }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "type",
+        "type": 0,
+        "item": {
+          "choix": [
+            { "chemin": "char" },
+            { "chemin": "string" },
+            { "chemin": "bool" },
+            { "chemin": "int" },
+            { "chemin": "long" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "auMoins1espaceOuALaLigne",
+        "item": {
+          "repetition": {
+            "min": 1,
+            "item": {
+              "choix": [
+                {
+                  "repetition": {
+                    "min": 1,
+                    "item": { "chemin": " " }
+                  }
+                },
+                {
+                  "repetition": {
+                    "min": 1,
+                    "item": { "chemin": "\n" }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "espaceOuALaLignePossible",
+        "item": {
+          "repetition": {
+            "min": 0,
+            "item": {
+              "choix": [
+                {
+                  "repetition": {
+                    "min": 0,
+                    "item": { "chemin": " " }
+                  }
+                },
+                {
+                  "repetition": {
+                    "min": 0,
+                    "item": { "chemin": "\n" }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "declarationVariable",
+        "type": 1,
+        "item": [
+          { "ref": "type" },
+          { "ref": "auMoins1espaceOuALaLigne" },
+          { "ref": "nomVariable" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ";" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "donnee",
+        "item": {
+          "choix": [
+            { "ref": "nombre" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "declarationEtInitVariable",
+        "type": 1,
+        "item": [
+          { "ref": "type" },
+          { "ref": "auMoins1espaceOuALaLigne" },
+          { "ref": "nomVariable" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "=" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "donnee" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ";" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "instruction",
+        "item": [
+          { "ref": "espaceOuALaLignePossible" },
+          {
+            "choix": [
+              { "ref": "declarationVariable" },
+              { "ref": "declarationEtInitVariable" }
+            ]
+          }
+        ]
+      }
+    },
+    { "ref": "instruction" }
+  ]
+}

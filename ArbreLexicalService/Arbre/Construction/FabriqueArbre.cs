@@ -14,6 +14,7 @@ namespace ArbreLexicalService.Arbre.Construction
 {
     internal class FabriqueArbre : IFabriqueArbre
     {
+
         #region Protected Fields
 
         protected ElementConstructionDto elementsConstruction;
@@ -24,14 +25,24 @@ namespace ArbreLexicalService.Arbre.Construction
 
         private readonly IArbreConstruction arbre;
 
+        private readonly List<BlockInfos> blocksInfos =
+            new List<BlockInfos>();
+
         #endregion Private Fields
 
         #region Public Constructors
 
         public FabriqueArbre(
-            IArbreConstruction arbre)
+            IArbreConstruction arbre) : this(arbre, null)
+        {
+        }
+
+        public FabriqueArbre(
+            IArbreConstruction arbre,
+            ElementConstructionDto elementsConstruction)
         {
             this.arbre = arbre;
+            this.elementsConstruction = elementsConstruction;
         }
 
         #endregion Public Constructors
@@ -43,6 +54,14 @@ namespace ArbreLexicalService.Arbre.Construction
             get
             {
                 return elementsConstruction;
+            }
+        }
+
+        internal List<BlockInfos> BlocksInfos
+        {
+            get
+            {
+                return blocksInfos;
             }
         }
 
@@ -151,7 +170,7 @@ namespace ArbreLexicalService.Arbre.Construction
         }
 
         private async Task ConstruireAsync(
-                            IEnumerable<Etat> etatsDebut,
+            IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             ElementConstructionDto elementConstruction)
         {
@@ -185,6 +204,20 @@ namespace ArbreLexicalService.Arbre.Construction
                             etatsDebut,
                             etatsFin,
                             elementConstruction as ChoixElementsConstructionDto);
+                        break;
+
+                    case EnumTypeElement.Etiquette:
+                        await ConstruireEtiquetteAsync(
+                            etatsDebut,
+                            etatsFin,
+                            elementConstruction as ElementEtiquetteConstructionDto);
+                        break;
+
+                    case EnumTypeElement.Reference:
+                        await ConstruireReferenceAsync(
+                            etatsDebut,
+                            etatsFin,
+                            elementConstruction as ElementReferenceConstructionDto);
                         break;
 
                     default:
@@ -303,7 +336,7 @@ namespace ArbreLexicalService.Arbre.Construction
         }
 
         private async Task ConstruireChoixAsync(
-                                    IEnumerable<Etat> etatsDebut, 
+            IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             ChoixElementsConstructionDto donnees)
         {
@@ -318,21 +351,173 @@ namespace ArbreLexicalService.Arbre.Construction
 
                     foreach (var donneesElement in donnees.Elements)
                     {
-                        var element = await CreerElementAsync(
-                            new Etat[] { elementParent.EtatEntree },
-                            new Etat[] { elementParent.EtatSortie });
+                        if (donneesElement.TypeElement != EnumTypeElement.Etiquette)
+                        {
+                            var element = await CreerElementAsync(
+                                new Etat[] { elementParent.EtatEntree },
+                                new Etat[] { elementParent.EtatSortie });
 
-                        var task = ConstruireAsync(
-                            new Etat[] { element.EtatEntree },
-                            new Etat[] { element.EtatSortie },
-                            donneesElement);
-                        tasks
-                            .Add(task);
+                            var task = ConstruireAsync(
+                                new Etat[] { element.EtatEntree },
+                                new Etat[] { element.EtatSortie },
+                                donneesElement);
+                            tasks
+                                .Add(task);
+                        }
+                        else
+                        {
+                            await ConstruireEtiquetteAsync(
+                                null,
+                                null,
+                                donneesElement as ElementEtiquetteConstructionDto);
+                        }
                     }
 
                     Task
                         .WaitAll(
                             tasks.ToArray());
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        private async Task ConstruireEtiquetteAsync(
+            IEnumerable<Etat> etatsDebut,
+            IEnumerable<Etat> etatsFin,
+            ElementEtiquetteConstructionDto donnees)
+        {//todo injecter les étiquette (en début ou fin) dans les états et interdire (après mise en place) les ajouts de transitions sortantes (si début) ou entrantes (si fin)
+            try
+            {
+                if (null != donnees?.Element)
+                {
+                    if (donnees.TypeBloc != EnumTypeBlock.Autre &&
+                        !string.IsNullOrWhiteSpace(donnees.Id))
+                    {
+                        // Enregistrement du block pour permettre les références dessus
+                        lock (blocksInfos)
+                        {
+                            var blockInfosEnregistre = blocksInfos
+                                .FirstOrDefault(b => b.Id == donnees.Id);
+
+                            if (null != blockInfosEnregistre)
+                            {
+                                if (null != blockInfosEnregistre.Donnees)
+                                {
+                                    throw new ExceptionArbreConstruction();
+                                }
+                                else
+                                { // Le block a été enregistré par une référence en attente => on garnit la/les référence(s) en attente
+
+                                    blockInfosEnregistre.Donnees = donnees.Element;
+                                    var elementsEnAttente = blockInfosEnregistre.ElementsEnAttente;
+
+                                    if (elementsEnAttente.Any())
+                                    {
+                                        var tasks = new List<Task>();
+
+                                        foreach (var elementEnAttente in elementsEnAttente)
+                                        {
+                                            var task = ConstruireAsync(
+                                                new Etat[] { elementEnAttente.EtatEntree },
+                                                new Etat[] { elementEnAttente.EtatSortie },
+                                                donnees.Element);
+                                            tasks
+                                                .Add(task);
+                                        }
+
+                                        Task
+                                            .WaitAll(
+                                                tasks.ToArray());
+                                    }
+                                }
+                            }
+                            else
+                            { // Le block n'existe pas encore => ajout
+
+                                var infos = new BlockInfos(
+                                    donnees.Id,
+                                    donnees.Element);
+
+                                blocksInfos
+                                    .Add(infos);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
+        private async Task ConstruireReferenceAsync(
+            IEnumerable<Etat> etatsDebut, 
+            IEnumerable<Etat> etatsFin, 
+            ElementReferenceConstructionDto donnees)
+        {//todo interdire référence circulaire !
+            try
+            {
+                if (null != donnees?.Id &&
+                    !string.IsNullOrWhiteSpace(donnees.Id))
+                {
+                    ElementConstructionDto elementSource = null;
+                    var elementParent = await CreerElementAsync(
+                        etatsDebut,
+                        etatsFin);
+
+                    lock (blocksInfos)
+                    {
+                        var blockInfosEnregistre = blocksInfos
+                            .FirstOrDefault(b => b.Id == donnees.Id);
+
+                        if (null == blockInfosEnregistre)
+                        {
+                            blockInfosEnregistre = new BlockInfos(
+                                donnees.Id);
+
+                            blocksInfos
+                                .Add(
+                                    blockInfosEnregistre);
+                        }
+
+                        if (null != blockInfosEnregistre.Donnees)
+                        {
+                            elementSource = blockInfosEnregistre.Donnees;
+                        }
+                        else
+                        { // Le block n'existe pas encore => ajout pour référencer cette cible
+
+                            blockInfosEnregistre
+                                .AjouterElementEnAttente(
+                                    elementParent);
+                        }
+                    }
+
+                    if (null != elementSource)
+                    {                       
+                        await ConstruireAsync(
+                            new Etat[] { elementParent.EtatEntree },
+                            new Etat[] { elementParent.EtatSortie },
+                            elementSource);
+                    }
                 }
             }
             catch (Exception ex)
@@ -393,9 +578,20 @@ namespace ArbreLexicalService.Arbre.Construction
                                     null);
                             etatsDebutOuFin = new Etat[] { element.EtatSortie };
 
+                            if (i == 0 &&
+                                nbreMax == int.MaxValue)
+                            { // Max = infini => boucle sur le 1er élément
+
+                                arbre
+                                    .AjouterTransition(
+                                        element.EtatSortie,
+                                        element.EtatEntree);
+                            }
+
                             if (nbreMin < nbreElements &&
                                 i + 1 == nbreMin)
-                            {
+                            { // min < max (< infini) => sortie possible
+
                                 arbre
                                     .AjouterTransition(
                                         element.EtatSortie,
@@ -430,7 +626,7 @@ namespace ArbreLexicalService.Arbre.Construction
         }
 
         private async Task ConstruireSequenceAsync(
-                    IEnumerable<Etat> etatsDebut, 
+                    IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             SequenceElementsConstructionDto donnees)
         {
@@ -438,15 +634,14 @@ namespace ArbreLexicalService.Arbre.Construction
             {
                 if ((donnees?.Elements?.Any()).GetValueOrDefault())
                 {
-                    var dernieresDonneesElement = donnees.Elements
-                        .LastOrDefault();
                     var etatsDebutOuFin = etatsDebut;
 
-                    foreach (var donneesElement in donnees.Elements)
+                    for (int i = 0, nbre = donnees.Elements.Count(); i < nbre; i++)
                     {
+                        var donneesElement = donnees.Elements[i];
                         var element = await CreerElementAsync(
                             etatsDebutOuFin,
-                            donneesElement == dernieresDonneesElement ?
+                            i + 1 == nbre ?
                                 etatsFin :
                                 null);
                         etatsDebutOuFin = new Etat[] { element.EtatSortie };
@@ -470,8 +665,9 @@ namespace ArbreLexicalService.Arbre.Construction
                     ex);
             }
         }
+
         private async Task<IConstructionElementArbre> CreerElementAsync(
-            IEnumerable<Etat> etatsDebut, 
+            IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin)
         {
             try
@@ -486,9 +682,9 @@ namespace ArbreLexicalService.Arbre.Construction
                 var etatSortieChemin = element.EtatSortie;
 
                 await BrancherElementAsync(
-                    etatsDebut, 
-                    etatsFin, 
-                    etatEntreeChemin, 
+                    etatsDebut,
+                    etatsFin,
+                    etatEntreeChemin,
                     etatSortieChemin);
 
                 return element;
@@ -507,5 +703,89 @@ namespace ArbreLexicalService.Arbre.Construction
         }
 
         #endregion Private Methods
+
+        #region Private Classes
+
+        internal class BlockInfos
+        {
+            #region Private Fields
+
+            private readonly List<IConstructionElementArbre> elementsEnAttente =
+                new List<IConstructionElementArbre>();
+
+            private readonly string id;
+            private ElementConstructionDto donnees;
+
+            #endregion Private Fields
+
+            #region Public Constructors
+
+            public BlockInfos(
+                string id, 
+                ElementConstructionDto donnees)
+            {
+                this.id = id;
+                this.donnees = donnees;
+            }
+
+            public BlockInfos(
+                string id) : this(id, null)
+            {
+                this.id = id;
+            }
+
+            #endregion Public Constructors
+
+            #region Public Properties
+
+            public IConstructionElementArbre[] ElementsEnAttente
+            {
+                get
+                {
+                    return elementsEnAttente
+                        .ToArray();
+                }
+            }
+
+            public string Id
+            {
+                get
+                {
+                    return id;
+                }
+            }
+
+            #endregion Public Properties
+
+            #region Internal Properties
+
+            internal ElementConstructionDto Donnees
+            {
+                get
+                {
+                    return donnees;
+                }
+                set
+                {
+                    donnees = value;
+                }
+            }
+
+            #endregion Internal Properties
+
+            #region Internal Methods
+
+            internal void AjouterElementEnAttente(
+                IConstructionElementArbre elementEnAttente)
+            {
+                elementsEnAttente
+                    .Add(
+                        elementEnAttente);
+            }
+
+            #endregion Internal Methods
+        }
+
+        #endregion Private Classes
     }
 }

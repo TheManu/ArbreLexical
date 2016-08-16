@@ -5,5 +5,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
 {
     internal interface INavigationSurSymboles : INavigation
     {
+        void TransitionPar(
+            string symboles);
     }
 }

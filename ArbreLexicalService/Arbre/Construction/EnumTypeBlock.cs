@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace ArbreLexicalService.Arbre.Construction
 {
-    internal enum EnumTypeElement
+    internal enum EnumTypeBlock
     {
-        Chemin,
-        Repetition,
-        Sequence,
-        ChoixMultiple,
-        Etiquette,
-        Reference
+        Lexeme,
+        Syntaxe,
+        Reference,
+        Autre
     }
 }

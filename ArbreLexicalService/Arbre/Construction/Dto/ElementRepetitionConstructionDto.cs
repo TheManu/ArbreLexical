@@ -10,10 +10,6 @@ namespace ArbreLexicalService.Arbre.Construction.Dto
     [JsonObject]
     internal class ElementRepetitionConstructionDto : ElementConstructionDto
     {
-        public ElementRepetitionConstructionDto()
-        {
-        }
-
         public ElementRepetitionConstructionDto(
             ElementConstructionDto enfant, 
             int min, 

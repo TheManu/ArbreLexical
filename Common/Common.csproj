@@ -60,6 +60,7 @@
     <Compile Include="Exceptions\ExceptionBase.cs" />
     <Compile Include="Exceptions\ExceptionMetier.cs" />
     <Compile Include="Exceptions\ExceptionTechnique.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
     <Compile Include="Helpers\StringHelper.cs" />
     <Compile Include="Ioc\ChargementIoc.cs" />
     <Compile Include="Ioc\Fabrique.cs" />
