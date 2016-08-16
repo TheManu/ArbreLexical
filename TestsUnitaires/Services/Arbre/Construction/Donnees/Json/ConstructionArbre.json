@@ -5,31 +5,31 @@
         "id": "lettreMin",
         "item": {
           "choix": [
-            { chemin: "a" },
-            { chemin: "b" },
-            { chemin: "c" },
-            { chemin: "d" },
-            { chemin: "e" },
-            { chemin: "f" },
-            { chemin: "g" },
-            { chemin: "h" },
-            { chemin: "i" },
-            { chemin: "j" },
-            { chemin: "k" },
-            { chemin: "l" },
-            { chemin: "m" },
-            { chemin: "n" },
-            { chemin: "o" },
-            { chemin: "p" },
-            { chemin: "q" },
-            { chemin: "r" },
-            { chemin: "s" },
-            { chemin: "t" },
-            { chemin: "v" },
-            { chemin: "w" },
-            { chemin: "x" },
-            { chemin: "y" },
-            { chemin: "z" }
+            { "chemin": "a" },
+            { "chemin": "b" },
+            { "chemin": "c" },
+            { "chemin": "d" },
+            { "chemin": "e" },
+            { "chemin": "f" },
+            { "chemin": "g" },
+            { "chemin": "h" },
+            { "chemin": "i" },
+            { "chemin": "j" },
+            { "chemin": "k" },
+            { "chemin": "l" },
+            { "chemin": "m" },
+            { "chemin": "n" },
+            { "chemin": "o" },
+            { "chemin": "p" },
+            { "chemin": "q" },
+            { "chemin": "r" },
+            { "chemin": "s" },
+            { "chemin": "t" },
+            { "chemin": "v" },
+            { "chemin": "w" },
+            { "chemin": "x" },
+            { "chemin": "y" },
+            { "chemin": "z" }
           ]
         }
       }
@@ -39,31 +39,31 @@
         "id": "lettreMaj",
         "item": {
           "choix": [
-            { chemin: "A" },
-            { chemin: "B" },
-            { chemin: "C" },
-            { chemin: "D" },
-            { chemin: "E" },
-            { chemin: "F" },
-            { chemin: "G" },
-            { chemin: "H" },
-            { chemin: "I" },
-            { chemin: "J" },
-            { chemin: "K" },
-            { chemin: "L" },
-            { chemin: "M" },
-            { chemin: "N" },
-            { chemin: "O" },
-            { chemin: "P" },
-            { chemin: "Q" },
-            { chemin: "R" },
-            { chemin: "S" },
-            { chemin: "T" },
-            { chemin: "V" },
-            { chemin: "W" },
-            { chemin: "X" },
-            { chemin: "Y" },
-            { chemin: "Z" }
+            { "chemin": "A" },
+            { "chemin": "B" },
+            { "chemin": "C" },
+            { "chemin": "D" },
+            { "chemin": "E" },
+            { "chemin": "F" },
+            { "chemin": "G" },
+            { "chemin": "H" },
+            { "chemin": "I" },
+            { "chemin": "J" },
+            { "chemin": "K" },
+            { "chemin": "L" },
+            { "chemin": "M" },
+            { "chemin": "N" },
+            { "chemin": "O" },
+            { "chemin": "P" },
+            { "chemin": "Q" },
+            { "chemin": "R" },
+            { "chemin": "S" },
+            { "chemin": "T" },
+            { "chemin": "V" },
+            { "chemin": "W" },
+            { "chemin": "X" },
+            { "chemin": "Y" },
+            { "chemin": "Z" }
           ]
         }
       }
@@ -118,16 +118,16 @@
         "id": "chiffre",
         "item": {
           "choix": [
-            { chemin: "0" },
-            { chemin: "1" },
-            { chemin: "2" },
-            { chemin: "3" },
-            { chemin: "4" },
-            { chemin: "5" },
-            { chemin: "6" },
-            { chemin: "7" },
-            { chemin: "8" },
-            { chemin: "9" }
+            { "chemin": "0" },
+            { "chemin": "1" },
+            { "chemin": "2" },
+            { "chemin": "3" },
+            { "chemin": "4" },
+            { "chemin": "5" },
+            { "chemin": "6" },
+            { "chemin": "7" },
+            { "chemin": "8" },
+            { "chemin": "9" }
           ]
         }
       }
@@ -271,18 +271,62 @@
     },
     {
       "etiquette": {
+        "id": "ifThen",
+        "type": 1,
+        "item": [
+          { "chemin": "if" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "(" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expression" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ")" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "instructions" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ";" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
         "id": "instruction",
         "item": [
           { "ref": "espaceOuALaLignePossible" },
           {
             "choix": [
               { "ref": "declarationVariable" },
-              { "ref": "declarationEtInitVariable" }
+              { "ref": "declarationEtInitVariable" },
+              { "ref": "ifThen" }
             ]
           }
         ]
       }
     },
-    { "ref": "instruction" }
+    {
+      "etiquette": {
+        "id": "instructionsBlock",
+        "item": [
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "{" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "instruction" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "}" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "instructions",
+        "item": {
+          "choix": [
+            { "ref": "instruction" },
+            { "ref": "instructionsBlock" }
+          ]
+        }
+      }
+    },
+    { "ref": "instructions" }
   ]
 }

@@ -172,7 +172,8 @@ namespace ArbreLexicalService.Arbre.Construction
         private async Task ConstruireAsync(
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
-            ElementConstructionDto elementConstruction)
+            ElementConstructionDto elementConstruction,
+            Dictionary<string, Etat> dicoReferences = null)
         {
             try
             {
@@ -189,35 +190,40 @@ namespace ArbreLexicalService.Arbre.Construction
                         await ConstruireRepetitionAsync(
                             etatsDebut,
                             etatsFin,
-                            elementConstruction as ElementRepetitionConstructionDto);
+                            elementConstruction as ElementRepetitionConstructionDto,
+                            dicoReferences);
                         break;
 
                     case EnumTypeElement.Sequence:
                         await ConstruireSequenceAsync(
                             etatsDebut,
                             etatsFin,
-                            elementConstruction as SequenceElementsConstructionDto);
+                            elementConstruction as SequenceElementsConstructionDto,
+                            dicoReferences);
                         break;
 
                     case EnumTypeElement.ChoixMultiple:
                         await ConstruireChoixAsync(
                             etatsDebut,
                             etatsFin,
-                            elementConstruction as ChoixElementsConstructionDto);
+                            elementConstruction as ChoixElementsConstructionDto,
+                            dicoReferences);
                         break;
 
                     case EnumTypeElement.Etiquette:
                         await ConstruireEtiquetteAsync(
                             etatsDebut,
                             etatsFin,
-                            elementConstruction as ElementEtiquetteConstructionDto);
+                            elementConstruction as ElementEtiquetteConstructionDto,
+                            dicoReferences);
                         break;
 
                     case EnumTypeElement.Reference:
                         await ConstruireReferenceAsync(
                             etatsDebut,
                             etatsFin,
-                            elementConstruction as ElementReferenceConstructionDto);
+                            elementConstruction as ElementReferenceConstructionDto,
+                            dicoReferences);
                         break;
 
                     default:
@@ -338,7 +344,8 @@ namespace ArbreLexicalService.Arbre.Construction
         private async Task ConstruireChoixAsync(
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
-            ChoixElementsConstructionDto donnees)
+            ChoixElementsConstructionDto donnees,
+            Dictionary<string, Etat> dicoReferences = null)
         {
             try
             {
@@ -360,7 +367,8 @@ namespace ArbreLexicalService.Arbre.Construction
                             var task = ConstruireAsync(
                                 new Etat[] { element.EtatEntree },
                                 new Etat[] { element.EtatSortie },
-                                donneesElement);
+                                donneesElement,
+                                dicoReferences);
                             tasks
                                 .Add(task);
                         }
@@ -394,7 +402,8 @@ namespace ArbreLexicalService.Arbre.Construction
         private async Task ConstruireEtiquetteAsync(
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
-            ElementEtiquetteConstructionDto donnees)
+            ElementEtiquetteConstructionDto donnees,
+            Dictionary<string, Etat> dicoReferences = null)
         {//todo injecter les étiquette (en début ou fin) dans les états et interdire (après mise en place) les ajouts de transitions sortantes (si début) ou entrantes (si fin)
             try
             {
@@ -430,7 +439,8 @@ namespace ArbreLexicalService.Arbre.Construction
                                             var task = ConstruireAsync(
                                                 new Etat[] { elementEnAttente.EtatEntree },
                                                 new Etat[] { elementEnAttente.EtatSortie },
-                                                donnees.Element);
+                                                donnees.Element,
+                                                dicoReferences);
                                             tasks
                                                 .Add(task);
                                         }
@@ -470,53 +480,81 @@ namespace ArbreLexicalService.Arbre.Construction
 
         private async Task ConstruireReferenceAsync(
             IEnumerable<Etat> etatsDebut, 
-            IEnumerable<Etat> etatsFin, 
-            ElementReferenceConstructionDto donnees)
-        {//todo interdire référence circulaire !
+            IEnumerable<Etat> etatsFin,
+            ElementReferenceConstructionDto donnees,
+            Dictionary<string, Etat> dicoReferences = null)
+        {
             try
             {
                 if (null != donnees?.Id &&
                     !string.IsNullOrWhiteSpace(donnees.Id))
                 {
+                    dicoReferences = dicoReferences ?? new Dictionary<string, Etat>();
                     ElementConstructionDto elementSource = null;
                     var elementParent = await CreerElementAsync(
                         etatsDebut,
                         etatsFin);
 
-                    lock (blocksInfos)
-                    {
-                        var blockInfosEnregistre = blocksInfos
-                            .FirstOrDefault(b => b.Id == donnees.Id);
+                    Etat etatEntreeDeLaReference;
+                    if (dicoReferences.TryGetValue(donnees.Id, out etatEntreeDeLaReference))
+                    { // C'est une référence circulaire => ajout d'une transition vers le début de la construction de la référence
 
-                        if (null == blockInfosEnregistre)
-                        {
-                            blockInfosEnregistre = new BlockInfos(
-                                donnees.Id);
-
-                            blocksInfos
-                                .Add(
-                                    blockInfosEnregistre);
-                        }
-
-                        if (null != blockInfosEnregistre.Donnees)
-                        {
-                            elementSource = blockInfosEnregistre.Donnees;
-                        }
-                        else
-                        { // Le block n'existe pas encore => ajout pour référencer cette cible
-
-                            blockInfosEnregistre
-                                .AjouterElementEnAttente(
-                                    elementParent);
-                        }
+                        arbre
+                            .AjouterTransition(
+                                elementParent.EtatEntree,
+                                elementParent.EtatSortie);
+                        arbre
+                            .AjouterTransition(
+                                elementParent.EtatSortie,
+                                etatEntreeDeLaReference);
                     }
+                    else
+                    { // Pas de référence circulaire => construction de la référence (reportée si l'étiquette n'est pas encore définie)
 
-                    if (null != elementSource)
-                    {                       
-                        await ConstruireAsync(
-                            new Etat[] { elementParent.EtatEntree },
-                            new Etat[] { elementParent.EtatSortie },
-                            elementSource);
+                        lock (blocksInfos)
+                        {
+                            var blockInfosEnregistre = blocksInfos
+                                .FirstOrDefault(b => b.Id == donnees.Id);
+
+                            if (null == blockInfosEnregistre)
+                            {
+                                blockInfosEnregistre = new BlockInfos(
+                                    donnees.Id);
+
+                                blocksInfos
+                                    .Add(
+                                        blockInfosEnregistre);
+                            }
+
+                            if (null != blockInfosEnregistre.Donnees)
+                            {
+                                elementSource = blockInfosEnregistre.Donnees;
+                            }
+                            else
+                            { // Le block n'existe pas encore => ajout pour référencer cette cible
+
+                                blockInfosEnregistre
+                                    .AjouterElementEnAttente(
+                                        elementParent);
+                            }
+                        }
+
+                        if (null != elementSource)
+                        { // Création de la référence
+
+                            var dicoReferencesPourEnfants = new Dictionary<string, Etat>(
+                                dicoReferences);
+                            dicoReferencesPourEnfants
+                                .Add(
+                                    donnees.Id,
+                                    elementParent.EtatEntree);
+
+                            await ConstruireAsync(
+                                new Etat[] { elementParent.EtatEntree },
+                                new Etat[] { elementParent.EtatSortie },
+                                elementSource,
+                                dicoReferencesPourEnfants);
+                        }
                     }
                 }
             }
@@ -536,7 +574,8 @@ namespace ArbreLexicalService.Arbre.Construction
         private async Task ConstruireRepetitionAsync(
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
-            ElementRepetitionConstructionDto donnees)
+            ElementRepetitionConstructionDto donnees,
+            Dictionary<string, Etat> dicoReferences = null)
         {
             try
             {
@@ -601,7 +640,8 @@ namespace ArbreLexicalService.Arbre.Construction
                             var task = ConstruireAsync(
                                 new Etat[] { element.EtatEntree },
                                 etatsDebutOuFin,
-                                donnees.Element);
+                                donnees.Element,
+                                dicoReferences);
                             tasks
                                 .Add(task);
                         }
@@ -626,9 +666,10 @@ namespace ArbreLexicalService.Arbre.Construction
         }
 
         private async Task ConstruireSequenceAsync(
-                    IEnumerable<Etat> etatsDebut,
+            IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
-            SequenceElementsConstructionDto donnees)
+            SequenceElementsConstructionDto donnees,
+            Dictionary<string, Etat> dicoReferences = null)
         {
             try
             {
@@ -649,7 +690,8 @@ namespace ArbreLexicalService.Arbre.Construction
                         await ConstruireAsync(
                             new Etat[] { element.EtatEntree },
                             etatsDebutOuFin,
-                            donneesElement);
+                            donneesElement,
+                            dicoReferences);
                     }
                 }
             }
