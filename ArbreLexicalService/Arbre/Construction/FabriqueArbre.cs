@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -79,6 +80,11 @@ namespace ArbreLexicalService.Arbre.Construction
                         new Etat[] { arbre.EtatEntree },
                         new Etat[] { arbre.EtatSortie },
                         elementsConstruction);
+
+                    if (blocksInfos.Any(b => b.ElementsEnAttente.Any()))
+                    {
+                        throw new ExceptionArbreConstruction();
+                    }
                 }
             }
             catch (Exception ex)
@@ -173,7 +179,7 @@ namespace ArbreLexicalService.Arbre.Construction
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             ElementConstructionDto elementConstruction,
-            Dictionary<string, Etat> dicoReferences = null)
+            Dictionary<string, IConstructionElementArbre> dicoReferences = null)
         {
             try
             {
@@ -345,7 +351,7 @@ namespace ArbreLexicalService.Arbre.Construction
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             ChoixElementsConstructionDto donnees,
-            Dictionary<string, Etat> dicoReferences = null)
+            Dictionary<string, IConstructionElementArbre> dicoReferences = null)
         {
             try
             {
@@ -403,13 +409,13 @@ namespace ArbreLexicalService.Arbre.Construction
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             ElementEtiquetteConstructionDto donnees,
-            Dictionary<string, Etat> dicoReferences = null)
+            Dictionary<string, IConstructionElementArbre> dicoReferences = null)
         {//todo injecter les étiquette (en début ou fin) dans les états et interdire (après mise en place) les ajouts de transitions sortantes (si début) ou entrantes (si fin)
             try
             {
                 if (null != donnees?.Element)
                 {
-                    if (donnees.TypeBloc != EnumTypeBlock.Autre &&
+                    if (donnees.TypeBlock != EnumTypeBlock.Autre &&
                         !string.IsNullOrWhiteSpace(donnees.Id))
                     {
                         // Enregistrement du block pour permettre les références dessus
@@ -428,6 +434,7 @@ namespace ArbreLexicalService.Arbre.Construction
                                 { // Le block a été enregistré par une référence en attente => on garnit la/les référence(s) en attente
 
                                     blockInfosEnregistre.Donnees = donnees.Element;
+                                    blockInfosEnregistre.TypeBlock = donnees.TypeBlock;
                                     var elementsEnAttente = blockInfosEnregistre.ElementsEnAttente;
 
                                     if (elementsEnAttente.Any())
@@ -448,6 +455,16 @@ namespace ArbreLexicalService.Arbre.Construction
                                         Task
                                             .WaitAll(
                                                 tasks.ToArray());
+
+                                        foreach (var elementEnAttente in elementsEnAttente)
+                                        {
+                                            arbre
+                                                .Etiquetter(
+                                                    donnees.Id,
+                                                    donnees.TypeBlock,
+                                                    elementEnAttente.EtatEntree,
+                                                    elementEnAttente.EtatSortie);
+                                        }
                                     }
                                 }
                             }
@@ -456,6 +473,7 @@ namespace ArbreLexicalService.Arbre.Construction
 
                                 var infos = new BlockInfos(
                                     donnees.Id,
+                                    donnees.TypeBlock,
                                     donnees.Element);
 
                                 blocksInfos
@@ -482,38 +500,45 @@ namespace ArbreLexicalService.Arbre.Construction
             IEnumerable<Etat> etatsDebut, 
             IEnumerable<Etat> etatsFin,
             ElementReferenceConstructionDto donnees,
-            Dictionary<string, Etat> dicoReferences = null)
+            Dictionary<string, IConstructionElementArbre> dicoReferences = null)
         {
             try
             {
                 if (null != donnees?.Id &&
                     !string.IsNullOrWhiteSpace(donnees.Id))
                 {
-                    dicoReferences = dicoReferences ?? new Dictionary<string, Etat>();
-                    ElementConstructionDto elementSource = null;
+                    dicoReferences = dicoReferences ?? new Dictionary<string, IConstructionElementArbre>();
                     var elementParent = await CreerElementAsync(
                         etatsDebut,
                         etatsFin);
 
-                    Etat etatEntreeDeLaReference;
-                    if (dicoReferences.TryGetValue(donnees.Id, out etatEntreeDeLaReference))
+                    IConstructionElementArbre elementRefCirculaire;
+                    if (dicoReferences.TryGetValue(donnees.Id, out elementRefCirculaire))
                     { // C'est une référence circulaire => ajout d'une transition vers le début de la construction de la référence
 
                         arbre
                             .AjouterTransition(
                                 elementParent.EtatEntree,
-                                elementParent.EtatSortie);
+                                elementRefCirculaire.EtatEntree);
                         arbre
                             .AjouterTransition(
-                                elementParent.EtatSortie,
-                                etatEntreeDeLaReference);
+                                elementRefCirculaire.EtatSortie,
+                                elementParent.EtatSortie);
+
+                        arbre
+                            .Etiquetter(
+                                $"RefCirculaire: {donnees.Id}-{elementParent.EtatEntree}/{elementParent.EtatSortie}",
+                                EnumTypeBlock.Autre,
+                                elementParent.EtatEntree,
+                                elementParent.EtatSortie);
                     }
                     else
                     { // Pas de référence circulaire => construction de la référence (reportée si l'étiquette n'est pas encore définie)
 
+                        BlockInfos blockInfosEnregistre = null;
                         lock (blocksInfos)
                         {
-                            var blockInfosEnregistre = blocksInfos
+                            blockInfosEnregistre = blocksInfos
                                 .FirstOrDefault(b => b.Id == donnees.Id);
 
                             if (null == blockInfosEnregistre)
@@ -526,11 +551,7 @@ namespace ArbreLexicalService.Arbre.Construction
                                         blockInfosEnregistre);
                             }
 
-                            if (null != blockInfosEnregistre.Donnees)
-                            {
-                                elementSource = blockInfosEnregistre.Donnees;
-                            }
-                            else
+                            if (null == blockInfosEnregistre.Donnees)
                             { // Le block n'existe pas encore => ajout pour référencer cette cible
 
                                 blockInfosEnregistre
@@ -539,21 +560,29 @@ namespace ArbreLexicalService.Arbre.Construction
                             }
                         }
 
-                        if (null != elementSource)
+                        if (null != blockInfosEnregistre?.Donnees)
                         { // Création de la référence
 
-                            var dicoReferencesPourEnfants = new Dictionary<string, Etat>(
+                            var elementSource = blockInfosEnregistre.Donnees;
+                            var dicoReferencesPourEnfants = new Dictionary<string, IConstructionElementArbre>(
                                 dicoReferences);
                             dicoReferencesPourEnfants
                                 .Add(
                                     donnees.Id,
-                                    elementParent.EtatEntree);
+                                    elementParent);
 
                             await ConstruireAsync(
                                 new Etat[] { elementParent.EtatEntree },
                                 new Etat[] { elementParent.EtatSortie },
                                 elementSource,
                                 dicoReferencesPourEnfants);
+
+                            arbre
+                                .Etiquetter(
+                                    donnees.Id,
+                                    blockInfosEnregistre.TypeBlock,
+                                    elementParent.EtatEntree,
+                                    elementParent.EtatSortie);
                         }
                     }
                 }
@@ -575,7 +604,7 @@ namespace ArbreLexicalService.Arbre.Construction
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             ElementRepetitionConstructionDto donnees,
-            Dictionary<string, Etat> dicoReferences = null)
+            Dictionary<string, IConstructionElementArbre> dicoReferences = null)
         {
             try
             {
@@ -669,7 +698,7 @@ namespace ArbreLexicalService.Arbre.Construction
             IEnumerable<Etat> etatsDebut,
             IEnumerable<Etat> etatsFin,
             SequenceElementsConstructionDto donnees,
-            Dictionary<string, Etat> dicoReferences = null)
+            Dictionary<string, IConstructionElementArbre> dicoReferences = null)
         {
             try
             {
@@ -757,6 +786,7 @@ namespace ArbreLexicalService.Arbre.Construction
 
             private readonly string id;
             private ElementConstructionDto donnees;
+            private EnumTypeBlock typeBlock;
 
             #endregion Private Fields
 
@@ -764,14 +794,16 @@ namespace ArbreLexicalService.Arbre.Construction
 
             public BlockInfos(
                 string id, 
+                EnumTypeBlock typeBlock,
                 ElementConstructionDto donnees)
             {
                 this.id = id;
+                this.typeBlock = typeBlock;
                 this.donnees = donnees;
             }
 
             public BlockInfos(
-                string id) : this(id, null)
+                string id) : this(id, EnumTypeBlock.Autre, null)
             {
                 this.id = id;
             }
@@ -810,6 +842,18 @@ namespace ArbreLexicalService.Arbre.Construction
                 set
                 {
                     donnees = value;
+                }
+            }
+
+            public EnumTypeBlock TypeBlock
+            {
+                get
+                {
+                    return typeBlock;
+                }
+                set
+                {
+                    typeBlock = value;
                 }
             }
 

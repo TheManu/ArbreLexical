@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ArbreLexicalService.Arbre.Construction
 {
-    internal enum EnumTypeBlock
+    public enum EnumTypeBlock
     {
         Lexeme,
         Syntaxe,

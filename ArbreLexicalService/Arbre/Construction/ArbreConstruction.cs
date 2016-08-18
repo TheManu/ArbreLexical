@@ -93,6 +93,92 @@ namespace ArbreLexicalService.Arbre.Construction
 
         #region Public Methods
 
+        public void Etiquetter(
+            string id,
+            EnumTypeBlock typeBlock,
+            Etat etatEntree,
+            Etat etatSortie)
+        {
+            try
+            {
+                // Récupération des infos sur les états en entrée et en sortie
+                EtatInfos etatInfosEntree = null,
+                    etatInfosSortie = null;
+
+                using (lockeur.RecupererLockLecture())
+                {
+                    bool etatEntreeDansArbre = dicoEtatsInfos
+                        .TryGetValue(
+                            etatEntree,
+                            out etatInfosEntree);
+                    bool etatSortieDansArbre = dicoEtatsInfos
+                        .TryGetValue(
+                            etatSortie,
+                            out etatInfosSortie);
+
+                    if (!etatEntreeDansArbre ||
+                        !etatSortieDansArbre)
+                    {
+                        throw new ExceptionArbreConstruction(
+                            ExceptionBase.RecupererLibelleErreur());
+                    }
+                } // Note : on lève le verrou sur le dico pour maintenir les performances. On vérifie plus loin que les états existent encore (après les avoir lockés)...
+
+                // Lock sur les états source et cible en évitant les inter-locks : lock toujours dans le même ordre
+                var lockeurs = RecupererLockeurs(
+                    etatInfosEntree,
+                    etatInfosSortie);
+
+                using (lockeurs[0].RecupererLockEcriture())
+                {
+                    if (!etatInfosEntree.EstActif)
+                    {
+                        throw new ExceptionArbreConstruction(
+                            ExceptionBase.RecupererLibelleErreur());
+                    }
+
+                    etatEntree.Etiquette = new EtiquetteDto(
+                        id,
+                        typeBlock,
+                        EnumExtremiteEtiquette.Entree);
+
+                    etatInfosEntree
+                        .InterdireTransitionSortante();
+                }
+
+                if (lockeurs.Length == 2)
+                {
+                    using (lockeurs[1].RecupererLockEcriture())
+                    {
+                        if (!etatInfosSortie.EstActif)
+                        {
+                            throw new ExceptionArbreConstruction(
+                                ExceptionBase.RecupererLibelleErreur());
+                        }
+
+                        etatSortie.Etiquette = new EtiquetteDto(
+                            id,
+                            typeBlock,
+                            EnumExtremiteEtiquette.Sortie);
+
+                        etatInfosSortie
+                            .InterdireTransitionEntrante();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Fabrique.Instance
+                    ?.RecupererGestionnaireTraces()
+                    ?.PublierException(
+                        ex);
+
+                throw new ExceptionArbreConstruction(
+                    ExceptionBase.RecupererLibelleErreur(),
+                    ex);
+            }
+        }
+
         public Transition[] AjouterChemin(
             Etat etatDebut,
             string chemin)

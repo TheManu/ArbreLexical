@@ -59,5 +59,11 @@ namespace ArbreLexicalService.Arbre.Construction
         Transition[] AjouterChemin(
             Etat etatDebut, 
             string chemin);
+
+        void Etiquetter(
+            string id,
+            EnumTypeBlock typeBlock,
+            Etat etatEntree,
+            Etat etatSortie);
     }
 }

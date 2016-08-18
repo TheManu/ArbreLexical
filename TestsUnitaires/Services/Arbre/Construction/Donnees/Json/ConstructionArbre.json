@@ -147,6 +147,28 @@
     },
     {
       "etiquette": {
+        "id": "nombrePositiOuNegatif",
+        "item": [
+          {
+            "repetition": {
+              "min": 0,
+              "max": 1,
+              "item": {
+                "choix": [
+                  { "chemin": "+" },
+                  { "chemin": "-" }
+                ]
+              }
+            }
+          },
+          {
+            "ref": "nombre"
+          }
+        ]
+      }
+    },
+    {
+      "etiquette": {
         "id": "booleen",
         "type": 0,
         "item": {
@@ -244,10 +266,56 @@
     },
     {
       "etiquette": {
+        "id": "chaineCaracs",
+        "type": 0,
+        "item": [
+          { "chemin": "\"" },
+          {
+            "repetition": {
+              "min": 0,
+              "item": {
+                "choix": [
+                  { "chemin": " " },
+                  { "chemin": "_" },
+                  { "chemin": "-" },
+                  { "chemin": "." },
+                  { "chemin": "\"" },
+                  { "ref": "lettresMinEtMaj" }
+                ]
+              }
+            }
+          },
+          { "chemin": "\"" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "null",
+        "type": 0,
+        "item": { "chemin":  "null" }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "donneeConst",
+        "item": {
+          "choix": [
+            { "ref": "null" },
+            { "ref": "nombre" },
+            { "ref": "chaineCaracs" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
         "id": "donnee",
         "item": {
           "choix": [
-            { "ref": "nombre" }
+            { "ref": "donneeConst" },
+            { "ref": "nomVariable" },
+            { "ref": "expressionsBooleen" }
           ]
         }
       }
@@ -271,6 +339,136 @@
     },
     {
       "etiquette": {
+        "id": "expression ==",
+        "type": 1,
+        "item": [
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "=="},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expression !=",
+        "type": 1,
+        "item": [
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "!="},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expression <",
+        "type": 1,
+        "item": [
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "<"},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expression >",
+        "type": 1,
+        "item": [
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ">"},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expressionOr",
+        "type": 1,
+        "item": [
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "||"},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expressionAnd",
+        "type": 1,
+        "item": [
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "&&"},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expressionNot",
+        "type": 1,
+        "item": [
+          { "chemin": "!"},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expressionBooleen",
+        "item": {
+          "choix": [
+            { "ref": "booleen" },
+            { "ref": "expression ==" },
+            { "ref": "expression !=" },
+            { "ref": "expression <" },
+            { "ref": "expression >" },
+            { "ref": "expressionOr" },
+            { "ref": "expressionAnd" },
+            { "ref": "expressionNot" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expressionsBooleenDansParentheses",
+        "type": 1,
+        "item": [
+          { "chemin": "("},
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ")"}
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "expressionsBooleen",
+        "item": {
+          "choix": [
+            { "ref": "expressionBooleen" },
+            { "ref": "expressionsBooleenDansParentheses" }
+          ]
+        }
+      }
+    },
+    {
+      "etiquette": {
         "id": "ifThen",
         "type": 1,
         "item": [
@@ -278,13 +476,38 @@
           { "ref": "espaceOuALaLignePossible" },
           { "chemin": "(" },
           { "ref": "espaceOuALaLignePossible" },
-          { "ref": "expression" },
+          { "ref": "expressionsBooleen" },
           { "ref": "espaceOuALaLignePossible" },
           { "chemin": ")" },
+          { "ref": "instructions" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "ifThenElse",
+        "type": 1,
+        "item": [
+          { "chemin": "if" },
           { "ref": "espaceOuALaLignePossible" },
+          { "chemin": "(" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "ref": "expressionsBooleen" },
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin": ")" },
           { "ref": "instructions" },
           { "ref": "espaceOuALaLignePossible" },
-          { "chemin": ";" }
+          { "chemin": "else" },
+          { "ref": "instructions" }
+        ]
+      }
+    },
+    {
+      "etiquette": {
+        "id": "instructionVide",
+        "item": [
+          { "ref": "espaceOuALaLignePossible" },
+          { "chemin":  ";"}
         ]
       }
     },
@@ -295,9 +518,11 @@
           { "ref": "espaceOuALaLignePossible" },
           {
             "choix": [
+              { "ref": "instructionVide" },
               { "ref": "declarationVariable" },
               { "ref": "declarationEtInitVariable" },
-              { "ref": "ifThen" }
+              { "ref": "ifThen" },
+              { "ref": "ifThenElse" }
             ]
           }
         ]
@@ -309,9 +534,16 @@
         "item": [
           { "ref": "espaceOuALaLignePossible" },
           { "chemin": "{" },
-          { "ref": "espaceOuALaLignePossible" },
-          { "ref": "instruction" },
-          { "ref": "espaceOuALaLignePossible" },
+          {
+            "repetition": {
+              "min": 0,
+              "item": [
+                { "ref": "espaceOuALaLignePossible" },
+                { "ref": "instruction" },
+                { "ref": "espaceOuALaLignePossible" }
+              ]
+            }
+          },
           { "chemin": "}" }
         ]
       }

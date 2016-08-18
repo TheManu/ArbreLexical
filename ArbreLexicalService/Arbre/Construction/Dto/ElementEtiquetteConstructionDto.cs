@@ -48,7 +48,7 @@ namespace ArbreLexicalService.Arbre.Construction.Dto
             }
         }
 
-        internal EnumTypeBlock TypeBloc
+        internal EnumTypeBlock TypeBlock
         {
             get
             {

@@ -28,6 +28,8 @@ namespace ArbreLexicalService.Arbre.Dto
                     ref identifiantMax);
         }
 
+        public EtiquetteDto Etiquette { get; internal set; }
+
         #endregion Public Constructors
 
         #region Public Properties

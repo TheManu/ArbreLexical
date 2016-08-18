@@ -70,7 +70,9 @@
     <Compile Include="Arbre\Construction\IDeserialisateurElement.cs" />
     <Compile Include="Arbre\Construction\IFabriqueArbre.cs" />
     <Compile Include="Arbre\Construction\IFabriqueArbreDepuisJson.cs" />
+    <Compile Include="Arbre\Dto\EnumExtremiteEtiquette.cs" />
     <Compile Include="Arbre\Dto\Etat.cs" />
+    <Compile Include="Arbre\Dto\EtiquetteDto.cs" />
     <Compile Include="Arbre\Dto\IEtatTransitionsSortantes.cs" />
     <Compile Include="Arbre\Dto\Transition.cs" />
     <Compile Include="Arbre\Dto\EtatTransitionsSortantes.cs" />

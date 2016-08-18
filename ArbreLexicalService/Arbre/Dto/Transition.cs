@@ -118,7 +118,7 @@ namespace ArbreLexicalService.Arbre.Dto
                     symbole.Value.ToString().Replace("\n", "A la ligne") :
                     string.Empty);
 
-                return $"Transition {etatSource.Identifiant}=={symboleAffichage}==>{etatCible.Identifiant}";
+                return $"Transition {etatSource.Identifiant}=='{symboleAffichage}'==>{etatCible.Identifiant}";
             }
             catch (Exception ex)
             {

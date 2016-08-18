@@ -6,6 +6,7 @@ using ArbreLexicalService.Arbre.Construction;
 using System.Threading.Tasks;
 using System.Linq;
 using ArbreLexicalService.Arbre.Construction.Dto;
+using ArbreLexicalService.Arbre.Dto;
 
 namespace TestsUnitaires.Services.Arbre.Construction
 {
@@ -15,6 +16,16 @@ namespace TestsUnitaires.Services.Arbre.Construction
     [TestClass]
     public class FabriqueArbreDepuisJsonTest
     {
+        #region Private Fields
+
+        private Tuple<IArbreConstruction, IFabriqueArbreDepuisJson> arbreDepuisFichierJson = null;
+
+        private TestContext testContextInstance;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
         public FabriqueArbreDepuisJsonTest()
         {
             //
@@ -22,7 +33,9 @@ namespace TestsUnitaires.Services.Arbre.Construction
             //
         }
 
-        private TestContext testContextInstance;
+        #endregion Public Constructors
+
+        #region Public Properties
 
         /// <summary>
         ///Obtient ou définit le contexte de test qui fournit
@@ -40,7 +53,8 @@ namespace TestsUnitaires.Services.Arbre.Construction
             }
         }
 
-        #region Attributs de tests supplémentaires
+        #endregion Public Properties
+
         //
         // Vous pouvez utiliser les attributs supplémentaires suivants lorsque vous écrivez vos tests :
         //
@@ -60,7 +74,8 @@ namespace TestsUnitaires.Services.Arbre.Construction
         // [TestCleanup()]
         // public void MyTestCleanup() { }
         //
-        #endregion
+
+        #region Public Methods
 
         [TestMethod]
         public async Task ChargerFichier()
@@ -80,17 +95,18 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .IsNotNull(
                     (fabrique as FabriqueArbre).ElementsConstruction);
         }
-
         [TestMethod]
-        public async Task ConstruireDepuisFichier()
+        public async Task ConstruireCheminEchec()
         {
             // Préparations
             IArbreConstruction arbre = new ArbreConstruction();
-            IFabriqueArbreDepuisJson fabrique = new FabriqueArbreDepuisJson(
+            const string chemin = "123456";
+            const string cheminSuivi = "6";
+            var elementRacine = new ElementCheminConstructionDto(
+                chemin);
+            IFabriqueArbre fabrique = new FabriqueArbre(
                 arbre,
-                @"Services\Arbre\Construction\Donnees\Json\ConstructionArbre.json");
-            await fabrique
-                .ChargerFichierAsync();
+                elementRacine);
 
             // Action à vérifier
             await fabrique
@@ -101,15 +117,27 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .IsNotNull(
                     (fabrique as FabriqueArbre).ElementsConstruction);
 
+            // Sans cheminer => échec
             var navigateur = (arbre as ArbreConstruction)
                 .RecupererNavigateurMultiSymbolesSur(
                     arbre.EtatEntree);
             navigateur
-                .TransitionPar(
-                    "long nom_Variable = 5;");
+                .TransitionsSansSymbole();
             Assert
-                .IsTrue(
+                .IsFalse(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+
+            // Mauvais chemin => pas de cible
+            navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    cheminSuivi);
+            Assert
+                .AreEqual(
+                    0,
+                    navigateur.EtatsCourants.Count());
         }
 
         [TestMethod]
@@ -145,95 +173,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
         }
 
         [TestMethod]
-        public async Task ConstruireSequenceReussite()
-        {
-            // Préparations
-            IArbreConstruction arbre = new ArbreConstruction();
-            const string chemin1 = "123456";
-            const string chemin2 = "abcdef";
-            var elementRacine = new SequenceElementsConstructionDto(
-                new[] 
-                {
-                    new ElementCheminConstructionDto(chemin1),
-                    new ElementCheminConstructionDto(chemin2)
-                });
-            IFabriqueArbre fabrique = new FabriqueArbre(
-                arbre,
-                elementRacine);
-
-            // Action à vérifier
-            await fabrique
-                .ConstruireAsync();
-
-            // Tests
-            Assert
-                .IsNotNull(
-                    (fabrique as FabriqueArbre).ElementsConstruction);
-
-            var navigateur = (arbre as ArbreConstruction)
-                .RecupererNavigateurMultiSymbolesSur(
-                    arbre.EtatEntree);
-            navigateur
-                .TransitionPar(
-                    chemin1);
-            navigateur
-                .TransitionPar(
-                    chemin2);
-            Assert
-                .IsTrue(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-        }
-
-        [TestMethod]
-        public async Task ConstruireChoixReussite()
-        {
-            // Préparations
-            IArbreConstruction arbre = new ArbreConstruction();
-            const string chemin1 = "123456";
-            const string chemin2 = "abcdef";
-            var elementRacine = new ChoixElementsConstructionDto(
-                new[] 
-                {
-                    new ElementCheminConstructionDto(chemin1),
-                    new ElementCheminConstructionDto(chemin2)
-                });
-            IFabriqueArbre fabrique = new FabriqueArbre(
-                arbre,
-                elementRacine);
-
-            // Action à vérifier
-            await fabrique
-                .ConstruireAsync();
-
-            // Tests
-            Assert
-                .IsNotNull(
-                    (fabrique as FabriqueArbre).ElementsConstruction);
-
-            // Choix 1
-            var navigateur = (arbre as ArbreConstruction)
-                .RecupererNavigateurMultiSymbolesSur(
-                    arbre.EtatEntree);
-            navigateur
-                .TransitionPar(
-                    chemin1);
-            Assert
-                .IsTrue(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-
-            // Choix 2
-            navigateur = (arbre as ArbreConstruction)
-                .RecupererNavigateurMultiSymbolesSur(
-                    arbre.EtatEntree);
-            navigateur
-                .TransitionPar(
-                    chemin2);
-            Assert
-                .IsTrue(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-        }
-
-        [TestMethod]
         public async Task ConstruireChoixEchec()
         {
             // Préparations
@@ -242,7 +181,7 @@ namespace TestsUnitaires.Services.Arbre.Construction
             const string chemin2 = "abcdef";
             const string cheminSuivi = "_";
             var elementRacine = new ChoixElementsConstructionDto(
-                new[] 
+                new[]
                 {
                     new ElementCheminConstructionDto(chemin1),
                     new ElementCheminConstructionDto(chemin2)
@@ -284,6 +223,196 @@ namespace TestsUnitaires.Services.Arbre.Construction
         }
 
         [TestMethod]
+        public async Task ConstruireChoixReussite()
+        {
+            // Préparations
+            IArbreConstruction arbre = new ArbreConstruction();
+            const string chemin1 = "123456";
+            const string chemin2 = "abcdef";
+            var elementRacine = new ChoixElementsConstructionDto(
+                new[]
+                {
+                    new ElementCheminConstructionDto(chemin1),
+                    new ElementCheminConstructionDto(chemin2)
+                });
+            IFabriqueArbre fabrique = new FabriqueArbre(
+                arbre,
+                elementRacine);
+
+            // Action à vérifier
+            await fabrique
+                .ConstruireAsync();
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            // Choix 1
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    chemin1);
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+
+            // Choix 2
+            navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    chemin2);
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
+
+        [TestMethod]
+        public async Task ConstruireDepuisFichierDeclarationVariable()
+        {
+            // Préparations + Action à vérifier
+            var tuple = await ChargerFichierEtConstruire();
+            var arbre = tuple.Item1;
+            var fabrique = tuple.Item2;
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    "long nom_Variable;");
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
+
+        [TestMethod]
+        public async Task ConstruireDepuisFichierDeclarationVariableLongEtInit()
+        {
+            // Préparations + Action à vérifier
+            var tuple = await ChargerFichierEtConstruire();
+            var arbre = tuple.Item1;
+            var fabrique = tuple.Item2;
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    "long nom_Variable = 5;");
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
+
+        [TestMethod]
+        public async Task ConstruireDepuisFichierDeclarationVariableStringEtInit()
+        {
+            // Préparations + Action à vérifier
+            var tuple = await ChargerFichierEtConstruire();
+            var arbre = tuple.Item1;
+            var fabrique = tuple.Item2;
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    "string nom_Variable = \"texte...\";");
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
+
+        [TestMethod]
+        public async Task ConstruireDepuisFichierIfThen()
+        {
+            // Préparations + Action à vérifier
+            var tuple = await ChargerFichierEtConstruire();
+            var arbre = tuple.Item1;
+            var fabrique = tuple.Item2;
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    "if (true) { int i = 10; }");
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
+
+        [TestMethod]
+        public async Task ConstruireDepuisFichierIfThenElse()
+        {
+            // Préparations + Action à vérifier
+            var tuple = await ChargerFichierEtConstruire();
+            var arbre = tuple.Item1;
+            var fabrique = tuple.Item2;
+            const string idEtiquette = "ifThenElse";
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+
+            navigateur
+                .TransitionsSansSymbole();
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants
+                        .Any(e => 
+                            null != e.Etiquette && 
+                            e.Etiquette.Id == idEtiquette && 
+                            e.Etiquette.TypeBlock == EnumTypeBlock.Syntaxe && 
+                            e.Etiquette.Extremite == EnumExtremiteEtiquette.Entree));
+
+            navigateur
+                .TransitionPar(
+                    "if (false) { int i = 10; } else { int j = 100; }");
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants
+                        .Any(e => 
+                            null != e.Etiquette && 
+                            e.Etiquette.Id == idEtiquette && 
+                            e.Etiquette.TypeBlock == EnumTypeBlock.Syntaxe && 
+                            e.Etiquette.Extremite == EnumExtremiteEtiquette.Sortie));
+        }
+
+        [TestMethod]
         public async Task ConstruireEtiquette()
         {
             // Préparations
@@ -321,7 +450,38 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .AreEqual(
                     elementEnfant,
                     block.Donnees);
-       }
+        }
+
+        [TestMethod]
+        public async Task ConstruireEtiquetteSansEnregistrement()
+        {
+            // Préparations
+            IArbreConstruction arbre = new ArbreConstruction();
+            const string chemin = "123456";
+            const string idEtiquette = "Etiq";
+            var typeBlock = EnumTypeBlock.Autre;
+            var elementEnfant = new ElementCheminConstructionDto(chemin);
+            var elementRacine = new ElementEtiquetteConstructionDto(
+                typeBlock,
+                idEtiquette,
+                elementEnfant);
+            IFabriqueArbre fabrique = new FabriqueArbre(
+                arbre,
+                elementRacine);
+
+            // Action à vérifier
+            await fabrique
+                .ConstruireAsync();
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+            Assert
+                .AreEqual(
+                    0,
+                    ((fabrique as FabriqueArbre).BlocksInfos?.Count).GetValueOrDefault(0));
+        }
 
         [TestMethod]
         public async Task ConstruireReferenceDoubleNiveau()
@@ -387,50 +547,7 @@ namespace TestsUnitaires.Services.Arbre.Construction
             Assert
                 .IsTrue(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-       }
-
-        [TestMethod]
-        public async Task ConstruireReferenceReussite()
-        {
-            // Préparations
-            IArbreConstruction arbre = new ArbreConstruction();
-            const string chemin = "123456";
-            const string idEtiquette = "Etiq";
-            var typeBlock = EnumTypeBlock.Reference;
-            var elementEtiquette = new ElementEtiquetteConstructionDto(
-                typeBlock,
-                idEtiquette,
-                new ElementCheminConstructionDto(chemin));
-            var elementReference = new ElementReferenceConstructionDto(
-                idEtiquette);
-            var elementRacine = new ChoixElementsConstructionDto(
-                new ElementConstructionDto[] {
-                    elementEtiquette,
-                    elementReference
-                });
-            IFabriqueArbre fabrique = new FabriqueArbre(
-                arbre,
-                elementRacine);
-
-            // Action à vérifier
-            await fabrique
-                .ConstruireAsync();
-
-            // Tests
-            Assert
-                .IsNotNull(
-                    (fabrique as FabriqueArbre).ElementsConstruction);
-
-            var navigateur = (arbre as ArbreConstruction)
-                .RecupererNavigateurMultiSymbolesSur(
-                    arbre.EtatEntree);
-            navigateur
-                .TransitionPar(
-                    chemin);
-            Assert
-                .IsTrue(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-       }
+        }
 
         [TestMethod]
         public async Task ConstruireReferenceEchec()
@@ -474,21 +591,27 @@ namespace TestsUnitaires.Services.Arbre.Construction
             Assert
                 .IsFalse(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-       }
+        }
 
         [TestMethod]
-        public async Task ConstruireEtiquetteSansEnregistrement()
+        public async Task ConstruireReferenceReussite()
         {
             // Préparations
             IArbreConstruction arbre = new ArbreConstruction();
             const string chemin = "123456";
             const string idEtiquette = "Etiq";
-            var typeBlock = EnumTypeBlock.Autre;
-            var elementEnfant = new ElementCheminConstructionDto(chemin);
-            var elementRacine = new ElementEtiquetteConstructionDto(
+            var typeBlock = EnumTypeBlock.Reference;
+            var elementEtiquette = new ElementEtiquetteConstructionDto(
                 typeBlock,
                 idEtiquette,
-                elementEnfant);
+                new ElementCheminConstructionDto(chemin));
+            var elementReference = new ElementReferenceConstructionDto(
+                idEtiquette);
+            var elementRacine = new ChoixElementsConstructionDto(
+                new ElementConstructionDto[] {
+                    elementEtiquette,
+                    elementReference
+                });
             IFabriqueArbre fabrique = new FabriqueArbre(
                 arbre,
                 elementRacine);
@@ -501,11 +624,68 @@ namespace TestsUnitaires.Services.Arbre.Construction
             Assert
                 .IsNotNull(
                     (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+            navigateur
+                .TransitionPar(
+                    chemin);
             Assert
-                .AreEqual(
-                    0,
-                    ((fabrique as FabriqueArbre).BlocksInfos?.Count).GetValueOrDefault(0));
-       }
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
+
+        [TestMethod]
+        public async Task ConstruireRepetitionMin0MaxInfiniReussite()
+        {
+            // Préparations
+            IArbreConstruction arbre = new ArbreConstruction();
+            const string chemin = "123456";
+            var elementRacine = new ElementRepetitionConstructionDto(
+                new ElementCheminConstructionDto(chemin),
+                0,
+                int.MaxValue);
+            IFabriqueArbre fabrique = new FabriqueArbre(
+                arbre,
+                elementRacine);
+
+            // Action à vérifier
+            await fabrique
+                .ConstruireAsync();
+
+            // Tests
+            Assert
+                .IsNotNull(
+                    (fabrique as FabriqueArbre).ElementsConstruction);
+
+            var navigateur = (arbre as ArbreConstruction)
+                .RecupererNavigateurMultiSymbolesSur(
+                    arbre.EtatEntree);
+
+            // 0 fois => ok
+            navigateur
+                .TransitionsSansSymbole();
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+
+            // 1 fois => ok
+            navigateur
+                .TransitionPar(
+                    chemin);
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+
+            // 2 fois => ok
+            navigateur
+                .TransitionPar(
+                    chemin);
+            Assert
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+        }
 
         [TestMethod]
         public async Task ConstruireRepetitionMin1Max2Reussite()
@@ -540,58 +720,6 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .IsTrue(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
 
-            navigateur
-                .TransitionPar(
-                    chemin);
-            Assert
-                .IsTrue(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-        }
-
-        [TestMethod]
-        public async Task ConstruireRepetitionMin2Max3Reussite()
-        {
-            // Préparations
-            IArbreConstruction arbre = new ArbreConstruction();
-            const string chemin = "123456";
-            var elementRacine = new ElementRepetitionConstructionDto(
-                new ElementCheminConstructionDto(chemin),
-                2,
-                3);
-            IFabriqueArbre fabrique = new FabriqueArbre(
-                arbre,
-                elementRacine);
-
-            // Action à vérifier
-            await fabrique
-                .ConstruireAsync();
-
-            // Tests
-            Assert
-                .IsNotNull(
-                    (fabrique as FabriqueArbre).ElementsConstruction);
-
-            var navigateur = (arbre as ArbreConstruction)
-                .RecupererNavigateurMultiSymbolesSur(
-                    arbre.EtatEntree);
-
-            // 1 fois => pas suffisant
-            navigateur
-                .TransitionPar(
-                    chemin);
-            Assert
-                .IsFalse(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-
-            // 2 fois => ok
-            navigateur
-                .TransitionPar(
-                    chemin);
-            Assert
-                .IsTrue(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-
-            // 3 fois => ok
             navigateur
                 .TransitionPar(
                     chemin);
@@ -668,15 +796,15 @@ namespace TestsUnitaires.Services.Arbre.Construction
         }
 
         [TestMethod]
-        public async Task ConstruireRepetitionMin0MaxInfiniReussite()
+        public async Task ConstruireRepetitionMin2Max3Reussite()
         {
             // Préparations
             IArbreConstruction arbre = new ArbreConstruction();
             const string chemin = "123456";
             var elementRacine = new ElementRepetitionConstructionDto(
                 new ElementCheminConstructionDto(chemin),
-                0,
-                int.MaxValue);
+                2,
+                3);
             IFabriqueArbre fabrique = new FabriqueArbre(
                 arbre,
                 elementRacine);
@@ -694,14 +822,15 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .RecupererNavigateurMultiSymbolesSur(
                     arbre.EtatEntree);
 
-            // 0 fois => ok
+            // 1 fois => pas suffisant
             navigateur
-                .TransitionsSansSymbole();
+                .TransitionPar(
+                    chemin);
             Assert
-                .IsTrue(
+                .IsFalse(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
 
-            // 1 fois => ok
+            // 2 fois => ok
             navigateur
                 .TransitionPar(
                     chemin);
@@ -709,7 +838,7 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .IsTrue(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
 
-            // 2 fois => ok
+            // 3 fois => ok
             navigateur
                 .TransitionPar(
                     chemin);
@@ -727,7 +856,7 @@ namespace TestsUnitaires.Services.Arbre.Construction
             const string chemin2 = "abcdef";
             const string cheminSuivi = "6";
             var elementRacine = new SequenceElementsConstructionDto(
-                new[] 
+                new[]
                 {
                     new ElementCheminConstructionDto(chemin1),
                     new ElementCheminConstructionDto(chemin2)
@@ -769,14 +898,18 @@ namespace TestsUnitaires.Services.Arbre.Construction
         }
 
         [TestMethod]
-        public async Task ConstruireCheminEchec()
+        public async Task ConstruireSequenceReussite()
         {
             // Préparations
             IArbreConstruction arbre = new ArbreConstruction();
-            const string chemin = "123456";
-            const string cheminSuivi = "6";
-            var elementRacine = new ElementCheminConstructionDto(
-                chemin);
+            const string chemin1 = "123456";
+            const string chemin2 = "abcdef";
+            var elementRacine = new SequenceElementsConstructionDto(
+                new[]
+                {
+                    new ElementCheminConstructionDto(chemin1),
+                    new ElementCheminConstructionDto(chemin2)
+                });
             IFabriqueArbre fabrique = new FabriqueArbre(
                 arbre,
                 elementRacine);
@@ -790,27 +923,49 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .IsNotNull(
                     (fabrique as FabriqueArbre).ElementsConstruction);
 
-            // Sans cheminer => échec
             var navigateur = (arbre as ArbreConstruction)
                 .RecupererNavigateurMultiSymbolesSur(
                     arbre.EtatEntree);
             navigateur
-                .TransitionsSansSymbole();
-            Assert
-                .IsFalse(
-                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
-
-            // Mauvais chemin => pas de cible
-            navigateur = (arbre as ArbreConstruction)
-                .RecupererNavigateurMultiSymbolesSur(
-                    arbre.EtatEntree);
+                .TransitionPar(
+                    chemin1);
             navigateur
                 .TransitionPar(
-                    cheminSuivi);
+                    chemin2);
             Assert
-                .AreEqual(
-                    0,
-                    navigateur.EtatsCourants.Count());
+                .IsTrue(
+                    navigateur.EtatsCourants.Contains(arbre.EtatSortie));
         }
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private async Task<Tuple<IArbreConstruction, IFabriqueArbreDepuisJson>> ChargerFichierEtConstruire()
+        {
+            if (null != arbreDepuisFichierJson)
+            {
+                return arbreDepuisFichierJson;
+            }
+
+            IArbreConstruction arbre = new ArbreConstruction();
+            IFabriqueArbreDepuisJson fabrique = new FabriqueArbreDepuisJson(
+                arbre,
+                @"Services\Arbre\Construction\Donnees\Json\ConstructionArbre.json");
+            await fabrique
+                .ChargerFichierAsync();
+
+            // Action à vérifier
+            await fabrique
+                .ConstruireAsync();
+
+            arbreDepuisFichierJson = new Tuple<IArbreConstruction, IFabriqueArbreDepuisJson>(
+                arbre,
+                fabrique);
+
+            return arbreDepuisFichierJson;
+        }
+
+        #endregion Private Methods
     }
 }
