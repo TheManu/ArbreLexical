@@ -4,10 +4,11 @@ using ArbreLexicalService.Exceptions;
 using Common.Exceptions;
 using Common.Ioc;
 using Common.Locks;
+using Common.Services;
 
 namespace ArbreLexicalService.Arbre.Construction
 {
-    internal class EtatInfos
+    internal class EtatInfos : ServiceBase
     {
         #region Private Fields
 
@@ -37,13 +38,7 @@ namespace ArbreLexicalService.Arbre.Construction
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -56,13 +51,7 @@ namespace ArbreLexicalService.Arbre.Construction
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }

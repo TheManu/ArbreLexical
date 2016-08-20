@@ -10,5 +10,14 @@ namespace Common.Traces
 
         void PublierException(
             Exception ex);
+
+        void PublierErreur(
+            string message);
+
+        void PublierInformation(
+            string message);
+
+        void PublierAvertissement(
+            string message);
     }
 }

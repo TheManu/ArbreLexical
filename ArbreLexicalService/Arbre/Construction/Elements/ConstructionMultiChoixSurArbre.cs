@@ -32,13 +32,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -56,13 +50,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }

@@ -64,6 +64,8 @@ namespace ArbreLexicalService.Arbre.Dto
                     ?.RecupererGestionnaireTraces()
                     ?.PublierException(
                         ex);
+
+                // L'exception n'est pas relancée !
             }
 
             return base.ToString();

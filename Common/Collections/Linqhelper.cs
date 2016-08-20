@@ -51,7 +51,7 @@ namespace Common.Collections
                         ex);
 
                 throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                    ExceptionBase.RecupererLibelleMessage(),
                     ex);
             }
         }
@@ -74,7 +74,7 @@ namespace Common.Collections
                         ex);
 
                 throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                    ExceptionBase.RecupererLibelleMessage(),
                     ex);
             }
         }
@@ -111,7 +111,7 @@ namespace Common.Collections
                         ex);
 
                 throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                    ExceptionBase.RecupererLibelleMessage(),
                     ex);
             }
         }
@@ -144,7 +144,7 @@ namespace Common.Collections
                         ex);
 
                 throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                    ExceptionBase.RecupererLibelleMessage(),
                     ex);
             }
         }

@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Common.Exceptions;
 using Common.Ioc;
+using Common.Services;
 
 namespace ArbreLexicalService.Arbre.Dto
 {
-    internal class EtatTransitionsSortantes : IEtatTransitionsSortantes
+    internal class EtatTransitionsSortantes : ServiceBase, IEtatTransitionsSortantes
     {
         #region Private Fields
 
@@ -59,13 +60,7 @@ namespace ArbreLexicalService.Arbre.Dto
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -82,13 +77,7 @@ namespace ArbreLexicalService.Arbre.Dto
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -104,13 +93,7 @@ namespace ArbreLexicalService.Arbre.Dto
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -126,19 +109,13 @@ namespace ArbreLexicalService.Arbre.Dto
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
 
         public IEtatTransitionsSortantes Supprimer(
-                                    Transition transition)
+            Transition transition)
         {
             try
             {
@@ -150,7 +127,7 @@ namespace ArbreLexicalService.Arbre.Dto
                 else
                 {
                     throw new ExceptionTechnique(
-                        ExceptionBase.RecupererLibelleErreur(
+                        ExceptionBase.RecupererLibelleMessage(
                             $"Impossible de supprimer la transition {transition}"));
                 }
 
@@ -158,13 +135,7 @@ namespace ArbreLexicalService.Arbre.Dto
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }

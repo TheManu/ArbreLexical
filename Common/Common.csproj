@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\Linqhelper.cs" />
+    <Compile Include="Exceptions\EnumTypeException.cs" />
     <Compile Include="Exceptions\ExceptionBase.cs" />
     <Compile Include="Exceptions\ExceptionMetier.cs" />
     <Compile Include="Exceptions\ExceptionTechnique.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Locks\LockLectureEtEcriture.cs" />
     <Compile Include="Locks\LockLectureUpgradeable.cs" />
     <Compile Include="Reflexion\ReflexionHelper.cs" />
+    <Compile Include="Services\ServiceBase.cs" />
     <Compile Include="Traces\ITraces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

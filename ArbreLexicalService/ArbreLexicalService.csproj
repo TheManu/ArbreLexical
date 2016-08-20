@@ -77,7 +77,7 @@
     <Compile Include="Arbre\Dto\Transition.cs" />
     <Compile Include="Arbre\Dto\EtatTransitionsSortantes.cs" />
     <Compile Include="Arbre\IArbreLexical.cs" />
-    <Compile Include="Exceptions\ExceptionArbreConstruction.cs" />
+    <Compile Include="Exceptions\ExceptionTechniqueArbreConstruction.cs" />
     <Compile Include="Ioc\ChargementIoc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

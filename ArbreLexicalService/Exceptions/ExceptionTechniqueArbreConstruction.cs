@@ -7,16 +7,16 @@ using Common.Exceptions;
 
 namespace ArbreLexicalService.Exceptions
 {
-    public class ExceptionArbreConstruction : ExceptionTechnique
+    public class ExceptionTechniqueArbreConstruction : ExceptionTechnique
     {
-        public ExceptionArbreConstruction() : base()
+        public ExceptionTechniqueArbreConstruction() : base()
         { }
 
-        public ExceptionArbreConstruction(
+        public ExceptionTechniqueArbreConstruction(
             string message) : base(message ?? string.Empty)
         { }
 
-        public ExceptionArbreConstruction(
+        public ExceptionTechniqueArbreConstruction(
             string message,
             Exception innerException) : base(message ?? string.Empty, innerException)
         { }

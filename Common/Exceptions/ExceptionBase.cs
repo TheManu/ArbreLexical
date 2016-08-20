@@ -9,8 +9,10 @@ using Common.Reflexion;
 
 namespace Common.Exceptions
 {
-    public class ExceptionBase : Exception
+    public abstract class ExceptionBase : Exception
     {
+        #region Public Constructors
+
         public ExceptionBase() : base()
         { }
 
@@ -22,23 +24,43 @@ namespace Common.Exceptions
             string message, 
             Exception innerException) : base(message ?? string.Empty, innerException)
         { }
+        #endregion Public Constructors
 
-        public static string RecupererLibelleErreur()
+        #region Public Properties
+
+        public abstract EnumTypeException TypeException
         {
-            return RecupererLibelleErreur(
+            get;
+        }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public static string RecupererLibelleMessage()
+        {
+            return RecupererLibelleMessage(
                 null,
                 -1);
         }
 
-        public static string RecupererLibelleErreur(
+        public static string RecupererLibelleMessage(
+            int niveauPile)
+        {
+            return RecupererLibelleMessage(
+                null,
+                Math.Abs(niveauPile) + 1);
+        }
+
+        public static string RecupererLibelleMessage(
             string message)
         {
-            return RecupererLibelleErreur(
+            return RecupererLibelleMessage(
                 message,
                 -1);
         }
 
-        public static string RecupererLibelleErreur(
+        public static string RecupererLibelleMessage(
             string message,
             int niveauPile)
         {
@@ -60,9 +82,13 @@ namespace Common.Exceptions
                     ?.RecupererGestionnaireTraces()
                     ?.PublierException(
                         ex);
+
+                // L'exception n'est pas relancée !
             }
 
             return message ?? string.Empty;
         }
+
+        #endregion Public Methods
     }
 }

@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestsUnitaires", "TestsUnitaires\TestsUnitaires.csproj", "{758778A0-1231-4BC4-80C4-E42C9C45B355}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalyseSyntaxiqueService", "AnalyseSyntaxiqueService\AnalyseSyntaxiqueService.csproj", "{D1EA4D95-F867-4742-8CEF-C1C961CFCFCC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{758778A0-1231-4BC4-80C4-E42C9C45B355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{758778A0-1231-4BC4-80C4-E42C9C45B355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{758778A0-1231-4BC4-80C4-E42C9C45B355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1EA4D95-F867-4742-8CEF-C1C961CFCFCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1EA4D95-F867-4742-8CEF-C1C961CFCFCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1EA4D95-F867-4742-8CEF-C1C961CFCFCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1EA4D95-F867-4742-8CEF-C1C961CFCFCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,5 +51,6 @@ Global
 		{B50C4630-2D25-47AF-BC38-A6C7AF6520A9} = {DC03FDA4-5CDE-46F0-9FA6-9A0C6D7A17E3}
 		{E468AAA6-6286-4F1D-8D15-DEEE1E4C47DB} = {70FEDCE8-1AF2-4693-8D2A-D893C1FBB909}
 		{758778A0-1231-4BC4-80C4-E42C9C45B355} = {CE6ACED6-A9BB-4C07-958F-77ED76DE160E}
+		{D1EA4D95-F867-4742-8CEF-C1C961CFCFCC} = {DC03FDA4-5CDE-46F0-9FA6-9A0C6D7A17E3}
 	EndGlobalSection
 EndGlobal

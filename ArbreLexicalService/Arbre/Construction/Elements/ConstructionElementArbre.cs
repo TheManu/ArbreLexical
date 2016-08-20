@@ -7,10 +7,11 @@ using ArbreLexicalService.Arbre.Dto;
 using ArbreLexicalService.Exceptions;
 using Common.Exceptions;
 using Common.Ioc;
+using Common.Services;
 
 namespace ArbreLexicalService.Arbre.Construction.Elements
 {
-    internal class ConstructionElementArbre : IConstructionElementArbre
+    internal class ConstructionElementArbre : ServiceBase, IConstructionElementArbre
     {
 
         #region Protected Fields
@@ -73,13 +74,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -96,13 +91,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -119,13 +108,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -145,13 +128,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -171,13 +148,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -192,7 +163,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             {
                 if (null != EtatEntree)
                 {
-                    throw new ExceptionArbreConstruction();
+                    throw new ExceptionTechniqueArbreConstruction();
                 }
 
                 EtatEntree = arbre
@@ -202,13 +173,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -227,13 +192,7 @@ namespace ArbreLexicalService.Arbre.Construction.Elements
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionArbreConstruction(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }

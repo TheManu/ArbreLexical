@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Services;
 
 namespace Common.Locks
 {
-    internal abstract class LockBase : ILockDisposable
+    internal abstract class LockBase : ServiceBase, ILockDisposable
     {
         protected readonly ReaderWriterLockSlim lockeur;
 

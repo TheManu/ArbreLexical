@@ -385,6 +385,7 @@ namespace TestsUnitaires.Services.Arbre.Construction
                 .RecupererNavigateurMultiSymbolesSur(
                     arbre.EtatEntree);
 
+            // Etiquettes en source
             navigateur
                 .TransitionsSansSymbole();
             Assert
@@ -396,12 +397,15 @@ namespace TestsUnitaires.Services.Arbre.Construction
                             e.Etiquette.TypeBlock == EnumTypeBlock.Syntaxe && 
                             e.Etiquette.Extremite == EnumExtremiteEtiquette.Entree));
 
+            // Navigation
             navigateur
                 .TransitionPar(
                     "if (false) { int i = 10; } else { int j = 100; }");
             Assert
                 .IsTrue(
                     navigateur.EtatsCourants.Contains(arbre.EtatSortie));
+
+            // Etiquettes en cibles
             Assert
                 .IsTrue(
                     navigateur.EtatsCourants
@@ -410,6 +414,24 @@ namespace TestsUnitaires.Services.Arbre.Construction
                             e.Etiquette.Id == idEtiquette && 
                             e.Etiquette.TypeBlock == EnumTypeBlock.Syntaxe && 
                             e.Etiquette.Extremite == EnumExtremiteEtiquette.Sortie));
+
+            // Etiquettes sur les états des transitions
+            Assert
+                .IsTrue(
+                    navigateur.Transitions
+                        .Any(t => 
+                            null != t.EtatSource.Etiquette && 
+                            t.EtatSource.Etiquette.Id == idEtiquette && 
+                            t.EtatSource.Etiquette.TypeBlock == EnumTypeBlock.Syntaxe && 
+                            t.EtatSource.Etiquette.Extremite == EnumExtremiteEtiquette.Entree));
+            Assert
+                .IsTrue(
+                    navigateur.Transitions.Where(t => navigateur.EtatsCourants.Contains(t.EtatCible))
+                        .Any(t => 
+                            null != t.EtatCible.Etiquette && 
+                            t.EtatCible.Etiquette.Id == idEtiquette && 
+                            t.EtatCible.Etiquette.TypeBlock == EnumTypeBlock.Syntaxe && 
+                            t.EtatCible.Etiquette.Extremite == EnumExtremiteEtiquette.Sortie));
         }
 
         [TestMethod]

@@ -7,10 +7,11 @@ using ArbreLexicalService.Arbre.Dto;
 using Common.Collections;
 using Common.Exceptions;
 using Common.Ioc;
+using Common.Services;
 
 namespace ArbreLexicalService.Arbre.Cheminement
 {
-    internal abstract class NavigationSurSymbolesBase : INavigationSurSymboles
+    internal abstract class NavigationSurSymbolesBase : ServiceBase, INavigationSurSymboles
     {
 
         #region Protected Fields
@@ -105,13 +106,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -133,13 +128,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -176,13 +165,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -203,13 +186,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -308,13 +285,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -333,13 +304,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }
@@ -364,13 +329,7 @@ namespace ArbreLexicalService.Arbre.Cheminement
             }
             catch (Exception ex)
             {
-                Fabrique.Instance
-                    ?.RecupererGestionnaireTraces()
-                    ?.PublierException(
-                        ex);
-
-                throw new ExceptionTechnique(
-                    ExceptionBase.RecupererLibelleErreur(),
+                throw EncapsulerEtGererException<ExceptionTechnique>(
                     ex);
             }
         }

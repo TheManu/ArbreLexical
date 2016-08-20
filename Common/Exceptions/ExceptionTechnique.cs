@@ -19,5 +19,13 @@ namespace Common.Exceptions
             string message,
             Exception innerException) : base(message ?? string.Empty, innerException)
         { }
+
+        public override EnumTypeException TypeException
+        {
+            get
+            {
+                return EnumTypeException.Technique;
+            }
+        }
     }
 }
